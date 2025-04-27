@@ -1,3 +1,5 @@
+import configurations.ConnectionPool;
+import configurations.EntityManager;
 import configurations.RouterRegister;
 import configurations.Server;
 import controllers.ControllerTeste;
@@ -9,6 +11,7 @@ public class ZardFrameworkApplication {
 		// Criação do servidor
 		Server app = new Server(8080);
 
+		EntityManager.generateSchema("entities");
 		// Criar instância do controlador
 		ControllerTeste controllerTeste = new ControllerTeste();
 		// Registrar as rotas automaticamente com base nas anotações

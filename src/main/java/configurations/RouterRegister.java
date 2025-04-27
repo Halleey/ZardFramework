@@ -1,7 +1,7 @@
 package configurations;
 
-import annotations.GetRouter;
-import annotations.PostRouter;
+import routes.GetRouter;
+import routes.PostRouter;
 import handlers.RequestHandler;
 
 import java.lang.reflect.Method;

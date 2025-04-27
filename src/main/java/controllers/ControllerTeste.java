@@ -1,6 +1,6 @@
 package controllers;
 
-import annotations.GetRouter;
+import routes.GetRouter;
 import requests.Request;
 import requests.Response;
 
