@@ -1,6 +1,7 @@
 package controllers;
 
 import entities.JsonUtils;
+import dtos.UserRequestDto;
 import entities.Users;
 import routes.DeleteRouter;
 import routes.GetRouter;
@@ -51,15 +52,13 @@ public class ControllerTeste {
         }
     }
 
-
-
     @PostRouter("/save")
     public void saveUser(Request req, Response res) throws IOException {
         String body = req.getBody(); // JSON vindo no body
 
-        Users user = JsonUtils.fromJson(body, Users.class); // transforma JSON -> Users
+        UserRequestDto user = JsonUtils.fromJson(body, UserRequestDto.class); // transforma JSON -> Users
 
-        service.createUser(user.getName(), user.getEmail(), user.getCpf()); // chama o service certinho
+        service.createUser(user); // chama o service certinho
 
         res.send("Usuário salvo!");
     }

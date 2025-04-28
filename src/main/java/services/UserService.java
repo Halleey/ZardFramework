@@ -1,35 +1,38 @@
 package services;
 
+import dtos.UserRequestDto;
 import entities.Users;
-import repositories.GenericRepository;
+
+import repositories.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
 
 public class UserService {
-   private final GenericRepository<Users, Long> genericRepository;
 
-    public UserService(GenericRepository<Users, Long> genericRepository) {
-        this.genericRepository = genericRepository;
+    private final UserRepository repository;
+
+    public UserService(UserRepository repository) {
+        this.repository = repository;
     }
 
-    public void createUser(String name, String email, String cpf) {
+    public void createUser(UserRequestDto  requestDto) {
         Users user = new Users();
-        user.setName(name);
-        user.setEmail(email);
-        user.setCpf(cpf);
-        genericRepository.save(user);
+        user.setName(requestDto.getName());
+        user.setEmail(requestDto.getEmail());
+        user.setCpf(requestDto.getCpf());
+        repository.save(user);
     }
 
     public List<Users> getAll() {
-      return genericRepository.findAll();
+      return repository.findAll();
 
     }
 
     public boolean deleteUser(Long id) {
-        Optional<Users> user = genericRepository.findById(id);
+        Optional<Users> user = repository.findById(id);
         if (user.isPresent()) {
-            genericRepository.deleteById(id);
+            repository.deleteById(id);
             return true;
         } else {
             return false;

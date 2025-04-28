@@ -2,9 +2,10 @@ import configurations.EntityManager;
 import configurations.RouterRegister;
 import configurations.Server;
 import controllers.ControllerTeste;
-import entities.Users;
-import repositories.GenericRepository;
-import repositories.GenericRepositoryImpl;
+import controllers.ProdutoController;
+import repositories.ProductRepository;
+import repositories.UserRepository;
+import services.ProdutoService;
 import services.UserService;
 
 import java.io.IOException;
@@ -19,13 +20,19 @@ public class ZardFrameworkApplication {
 
 
 		// 1. Cria o repositório para Users
-		GenericRepository<Users, Long> userRepository = new GenericRepositoryImpl<>(Users.class);
+		UserRepository  userRepository = new UserRepository();
+		ProductRepository repository = new ProductRepository();
+
 
 		// 2. Cria o UserService, passando o repositório
 		UserService userService = new UserService(userRepository);
+		ProdutoService produtoService = new ProdutoService(repository);
+
 
 		// 3. Cria o ControllerTeste, passando o UserService
 		ControllerTeste controllerTeste = new ControllerTeste(userService);
+		ProdutoController produtoController = new  ProdutoController(produtoService);
+		RouterRegister.registerRoutes(app, produtoController);
 		RouterRegister.registerRoutes(app, controllerTeste);
 
 		app.start();

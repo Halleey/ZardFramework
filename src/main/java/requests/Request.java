@@ -29,6 +29,7 @@ public class Request {
         return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8); // Lê os bytes e os converte em string
     }
 
+
     public String extractPathParam(String basePath) {
         String path = getPath();
         if (path.startsWith(basePath)) {

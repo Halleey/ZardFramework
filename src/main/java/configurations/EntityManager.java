@@ -50,35 +50,7 @@ public class EntityManager {
         StringBuilder sql = new StringBuilder();
         sql.append("CREATE TABLE IF NOT EXISTS ").append(tableName).append(" (");
 
-        Field[] fields = entityClass.getDeclaredFields();
-        List<String> columnDefinitions = new ArrayList<>();
-
-        // Processa cada campo da classe
-        for (Field field : fields) {
-            String columnName = field.getName();
-            String columnType = mapJavaTypeToSQL(field.getType());
-
-            // Verifica se o campo tem a anotação @Column
-            if (field.isAnnotationPresent(Column.class)) {
-                Column column = field.getAnnotation(Column.class);
-                if (!column.value().isEmpty()) {
-                    columnName = column.value();
-                }
-            }
-
-            // Se o campo tiver a anotação @Id, será a chave primária e pode ser AUTO_INCREMENT
-            String columnDefinition = columnName + " " + columnType;
-
-            if (field.isAnnotationPresent(Id.class)) {
-                // Aqui estamos verificando se o campo é a chave primária e deve ser auto incremento
-                columnDefinition += " PRIMARY KEY";
-
-                // Verifica se a anotação @Id implica em auto incremento (considerando MySQL ou similar)
-                columnDefinition += " AUTO_INCREMENT";
-            }
-
-            columnDefinitions.add(columnDefinition);
-        }
+        List<String> columnDefinitions = getStrings(entityClass);
 
         // Adiciona as definições das colunas na consulta SQL
         sql.append(String.join(", ", columnDefinitions));
@@ -96,6 +68,44 @@ public class EntityManager {
             System.err.println("Erro ao executar SQL: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private static List<String> getStrings(Class<?> entityClass) {
+        Field[] fields = entityClass.getDeclaredFields();
+        List<String> columnDefinitions = new ArrayList<>();
+
+        // Processa cada campo da classe
+        for (Field field : fields) {
+            String columnDefinition = getString(field);
+
+            if (field.isAnnotationPresent(Id.class)) {
+                // Aqui estamos verificando se o campo é a chave primária e deve ser auto incremento
+                columnDefinition += " PRIMARY KEY";
+
+                // Verifica se a anotação @Id implica em auto incremento (considerando MySQL ou similar)
+                columnDefinition += " AUTO_INCREMENT";
+            }
+
+            columnDefinitions.add(columnDefinition);
+        }
+        return columnDefinitions;
+    }
+
+    private static String getString(Field field) {
+        String columnName = field.getName();
+        String columnType = mapJavaTypeToSQL(field.getType());
+
+        // Verifica se o campo tem a anotação @Column
+        if (field.isAnnotationPresent(Column.class)) {
+            Column column = field.getAnnotation(Column.class);
+            if (!column.value().isEmpty()) {
+                columnName = column.value();
+            }
+        }
+
+        // Se o campo tiver a anotação @Id, será a chave primária e pode ser AUTO_INCREMENT
+        String columnDefinition = columnName + " " + columnType;
+        return columnDefinition;
     }
 
     // Mapeia os tipos Java para tipos SQL
