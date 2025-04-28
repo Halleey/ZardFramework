@@ -1,4 +1,5 @@
 package dbas;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -6,3 +7,4 @@ import java.lang.annotation.RetentionPolicy;
 public @interface Column {
     String value() default "";
 }
+

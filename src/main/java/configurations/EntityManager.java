@@ -1,5 +1,6 @@
 package configurations;
 
+
 import dbas.Column;
 import dbas.Entity;
 import dbas.Id;
