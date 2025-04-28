@@ -10,8 +10,61 @@ Inclui:
 - Um `UserService` para a lógica de negócio.
 - Um `ControllerTeste` com rotas GET e POST.
 - Um `ZardFrameworkApplication` para iniciar tudo.
-
+- Além de notations :Onde apenas com @ podemos definir funcionalidades.
 ---
+
+## Anotações Utilizadas
+
+### **@Target(ElementType.METHOD)**  
+A anotação `@Target` define o tipo de elemento onde a anotação pode ser aplicada. No caso de `@GetRouter` e `@PostRouter`, elas podem ser aplicadas **apenas em métodos**.
+
+```java
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface GetRouter {
+    String value();
+}
+
+@Target(ElementType.METHOD)
+@Retention(RetentionPolicy.RUNTIME)
+public @interface PostRouter {
+    String value();
+}
+
+
+```
+
+*RetentionPolicy.Runtime*: A anotação `@Retention` determina por quanto tempo a anotação deve ser mantida. Usamos RUNTIME para que a anotação esteja disponível em tempo de execução.
+
+
+## Entity
+
+*Define* que uma classe que possua a anotação `@Entity` será uma classe modelo para criação de uma tabela no banco de dados
+````
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Entity {
+    String value() default "";
+}
+
+````
+##  @Id
+*Marca o campo que representa o ID da entidade*. Este campo será usado para identificação única no banco de dados.
+
+````
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Id {
+}
+
+````
+##  @Column
+*Define um campo como uma coluna mapeada para o banco de dados*. 
+
+````
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Column {
+    String value() default "";
+}
+````
 
 ## Estrutura de Código
 
