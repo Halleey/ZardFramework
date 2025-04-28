@@ -28,4 +28,14 @@ public class ProdutoService {
 
         return repository.findByName(nome);
     }
+
+    public void update(Long id, String nome) {
+
+
+        Product product =  repository.findById(id).orElseThrow(() -> new RuntimeException("Produto não existe"));
+
+        product.setNome(nome);
+
+        repository.update(product);
+    }
 }

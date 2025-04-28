@@ -25,6 +25,9 @@ public class Server {
         router.addRoute("GET", path, handler);
     }
 
+    public void patch(String path, RequestHandler handler) {
+        router.addRoute("PATCH", path, handler);
+    }
     public void delete(String path, RequestHandler handler) {
         router.addRoute("DELETE", path, handler);
     }

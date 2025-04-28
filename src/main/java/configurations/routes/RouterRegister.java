@@ -52,6 +52,19 @@ public class RouterRegister {
                 };
                 server.delete(path, handler);
             }
+            if(method.isAnnotationPresent(PatchRouter.class)) {
+                PatchRouter patchRouter = method.getAnnotation(PatchRouter.class);
+                String path =  patchRouter.value();
+                RequestHandler handler = (req, res) -> {
+                    try {
+                        method.invoke(controller, req, res);
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                };
+                server.patch(path, handler);
+            }
         }
     }
 }

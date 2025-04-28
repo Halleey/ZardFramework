@@ -143,6 +143,42 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public void update(T entity) {
+        StringBuilder sql = new StringBuilder("UPDATE " + tableName + " SET ");
+        List<String> setClauses = new ArrayList<>();
+        List<Object> values = new ArrayList<>();
+
+        for (Field field : columnFields) {
+            if (!field.equals(idField)) { // Não atualiza o ID
+                setClauses.add(field.getName() + " = ?");
+                try {
+                    values.add(field.get(entity));
+                } catch (IllegalAccessException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        }
+
+        sql.append(String.join(", ", setClauses));
+        sql.append(" WHERE " + idField.getName() + " = ?");
+
+        try (Connection conn = ConnectionPool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql.toString())) {
+
+            for (int i = 0; i < values.size(); i++) {
+                stmt.setObject(i + 1, values.get(i));
+            }
+
+            // Seta o ID como último parâmetro
+            stmt.setObject(values.size() + 1, idField.get(entity));
+
+            stmt.executeUpdate();
+        } catch (SQLException | IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public Class<T> getEntityClass() {
         return entityClass;
     }

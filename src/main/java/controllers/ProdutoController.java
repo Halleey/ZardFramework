@@ -1,6 +1,7 @@
 package controllers;
 
 import configurations.routes.GetRouter;
+import configurations.routes.PatchRouter;
 import dtos.ProductRequestDto;
 import entities.JsonUtils;
 import configurations.requests.Request;
@@ -41,4 +42,29 @@ public class ProdutoController {
         response.send(json);
     }
 
+    @PatchRouter("/product")
+    public void updateProductName(Request request, Response response) throws IOException {
+        // Captura o id e o novo nome da requisição
+        String idParam = request.getQueryParam("id");
+        String novoNome = request.getQueryParam("nome");
+
+        if (idParam == null || novoNome == null) {
+            response.send(400, "parametro errado");
+            response.send("Parâmetros 'id' e 'nome' são obrigatórios para atualização.");
+            return;
+        }
+
+        try {
+            Long id = Long.parseLong(idParam); // Converte o ID para Long
+            produtoService.update(id, novoNome); // Atualiza no serviço
+            response.send("Produto atualizado com sucesso.");
+        } catch (NumberFormatException e) {
+            response.send(400, "campo errado ou inexistente");
+            response.send("ID inválido.");
+        } catch (RuntimeException e) {
+            response.send(404, "rota não existe");
+            response.send(e.getMessage());
+        }
+    }
 }
+

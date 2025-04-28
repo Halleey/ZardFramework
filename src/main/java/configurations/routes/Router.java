@@ -9,6 +9,7 @@ public class Router {
     private final Map<String, RequestHandler> getRoutes = new HashMap<>();
     private final Map<String, RequestHandler> postRoutes = new HashMap<>();
     private final Map<String, RequestHandler> deleteRoutes = new HashMap<>();
+    private final Map<String, RequestHandler> patchRoutes = new HashMap<>();
 
 
 
@@ -25,6 +26,9 @@ public class Router {
             case "DELETE" -> {
                 deleteRoutes.put(path, handler);
             }
+            case "PATCH" -> {
+                patchRoutes.put(path, handler);
+            }
         }
     }
 
@@ -35,11 +39,11 @@ public class Router {
             case "GET" -> routes = getRoutes;
             case "POST" -> routes = postRoutes;
             case "DELETE" -> routes = deleteRoutes;
+            case "PATCH" -> routes = patchRoutes;
             default -> {
                 return null;
             }
         }
-
         // Primeiro, tenta encontrar rota exata
         RequestHandler handler = routes.get(path);
         if (handler != null) {
@@ -52,7 +56,6 @@ public class Router {
                 return entry.getValue();
             }
         }
-
         return null;
     }
 }
