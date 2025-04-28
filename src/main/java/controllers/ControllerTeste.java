@@ -2,6 +2,7 @@ package controllers;
 
 import entities.JsonUtils;
 import entities.Users;
+import routes.DeleteRouter;
 import routes.GetRouter;
 import requests.Request;
 import requests.Response;
@@ -12,7 +13,6 @@ import java.io.IOException;
 import java.util.List;
 
 public class ControllerTeste {
-
 
     private final UserService service;
 
@@ -36,6 +36,22 @@ public class ControllerTeste {
         // Envia a resposta com a lista de usuários
         response.send(jsonResponse);
     }
+
+    @DeleteRouter("/delete")
+    public void deleteUser(Request req, Response res) throws IOException {
+        String idStr = req.extractPathParam("/delete");
+        Long id = Long.valueOf(idStr);
+
+        boolean deleted = service.deleteUser(id);
+
+        if (deleted) {
+            res.send("Usuário deletado com sucesso!");
+        } else {
+            res.send("Usuário não encontrado!");
+        }
+    }
+
+
 
     @PostRouter("/save")
     public void saveUser(Request req, Response res) throws IOException {

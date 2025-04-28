@@ -1,15 +1,23 @@
 package entities;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonSyntaxException;
 
 public class JsonUtils {
     private static final Gson gson = new Gson();
 
     public static <T> T fromJson(String json, Class<T> clazz) {
-        return gson.fromJson(json, clazz);
+        if (json == null || json.isBlank()) {
+            return null;
+        }
+        try {
+            return gson.fromJson(json, clazz);
+        } catch (JsonSyntaxException e) {
+            return null;
+        }
     }
 
     public static String toJson(Object obj) {
-        return new Gson().toJson(obj);
+        return gson.toJson(obj);
     }
 }

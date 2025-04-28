@@ -28,4 +28,17 @@ public class Request {
         InputStream inputStream = exchange.getRequestBody(); // Obtém o InputStream do corpo da requisição
         return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8); // Lê os bytes e os converte em string
     }
+
+    public String extractPathParam(String basePath) {
+        String path = getPath();
+        if (path.startsWith(basePath)) {
+            String[] parts = path.split("/");
+            if (parts.length > 2) {
+                return parts[2]; // Pega o valor após /delete/
+            }
+        }
+        return null;
+    }
+
+
 }

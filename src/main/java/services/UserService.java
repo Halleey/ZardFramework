@@ -4,6 +4,7 @@ import entities.Users;
 import repositories.GenericRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public class UserService {
    private final GenericRepository<Users, Long> genericRepository;
@@ -24,4 +25,16 @@ public class UserService {
       return genericRepository.findAll();
 
     }
+
+    public boolean deleteUser(Long id) {
+        Optional<Users> user = genericRepository.findById(id);
+        if (user.isPresent()) {
+            genericRepository.deleteById(id);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+
 }

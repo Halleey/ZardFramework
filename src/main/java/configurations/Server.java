@@ -24,6 +24,10 @@ public class Server {
         router.addRoute("GET", path, handler);
     }
 
+    public void delete(String path, RequestHandler handler) {
+        router.addRoute("DELETE", path, handler);
+    }
+
     public void post(String path, RequestHandler handler) {
         router.addRoute("POST", path, handler);
     }

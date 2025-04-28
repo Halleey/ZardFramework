@@ -1,5 +1,6 @@
 package configurations;
 
+import routes.DeleteRouter;
 import routes.GetRouter;
 import routes.PostRouter;
 import handlers.RequestHandler;
@@ -39,6 +40,19 @@ public class RouterRegister {
                     }
                 };
                 server.post(path, handler); // Registrar rota POST
+            }
+
+            if (method.isAnnotationPresent(DeleteRouter.class)) {
+                DeleteRouter deleteRouter = method.getAnnotation(DeleteRouter.class);
+                String path = deleteRouter.value();
+                RequestHandler handler = (req, res) -> {
+                    try {
+                        method.invoke(controller, req, res);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                };
+                server.delete(path, handler);
             }
         }
     }
