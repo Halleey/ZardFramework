@@ -8,9 +8,9 @@ import java.util.List;
 
 public class ConnectionPool {
 
-    private static final String URL =
-    private static final String USER =
-    private static final String PASSWORD =
+    private static final String URL = "jdbc:mysql://localhost:3306/frame?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true";
+    private static final String USER ="root";
+    private static final String PASSWORD = "zard";
 
     // Quantidade inicial de conexões no pool
     private static final int INITIAL_POOL_SIZE = 10;

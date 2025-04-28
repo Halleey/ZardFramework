@@ -8,4 +8,8 @@ public class JsonUtils {
     public static <T> T fromJson(String json, Class<T> clazz) {
         return gson.fromJson(json, clazz);
     }
+
+    public static String toJson(Object obj) {
+        return new Gson().toJson(obj);
+    }
 }

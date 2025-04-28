@@ -14,6 +14,7 @@ public class ZardFrameworkApplication {
 	public static void main(String[] args) throws IOException {
 		Server app = new Server(8080);
 
+		//Escanear o pacote para gerar as entidades.
 		EntityManager.generateSchema("entities");
 
 
