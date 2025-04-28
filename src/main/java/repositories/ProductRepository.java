@@ -1,11 +1,14 @@
 package repositories;
 
+import configurations.dbas.Querys;
+import configurations.genericsRepositories.GenericRepository;
 import entities.Product;
-import configurations.genericsRepositories.GenericRepositoryImpl;
 
-public class ProductRepository extends GenericRepositoryImpl<Product, Long> {
 
-    public ProductRepository() {
-        super(Product.class);
-    }
+import java.util.List;
+
+public interface ProductRepository extends GenericRepository<Product, Long> {
+
+    @Querys("SELECT * FROM product WHERE nome = ?")
+    List<Product> findByName(String name);
 }

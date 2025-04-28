@@ -40,6 +40,23 @@ public class Request {
         }
         return null;
     }
+    // Novo método para pegar parâmetros da query string
+    public String getQueryParam(String key) {
+        String query = exchange.getRequestURI().getQuery();
+        if (query == null || query.isEmpty()) {
+            return null;
+        }
+
+        String[] params = query.split("&");
+        for (String param : params) {
+            String[] pair = param.split("=");
+            if (pair.length == 2 && pair[0].equals(key)) {
+                return pair[1];
+            }
+        }
+
+        return null;
+    }
 
 
 }

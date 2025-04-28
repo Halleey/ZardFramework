@@ -4,6 +4,8 @@ import dtos.ProductRequestDto;
 import entities.Product;
 import repositories.ProductRepository;
 
+import java.util.List;
+
 
 public class ProdutoService {
 
@@ -20,5 +22,10 @@ public class ProdutoService {
         product.setNome(productRequestDto.getNome());
         product.setPrice(productRequestDto.getPrice());
         repository.save(product);
+    }
+
+    public List<Product> getProduct(String nome) {
+
+        return repository.findByName(nome);
     }
 }

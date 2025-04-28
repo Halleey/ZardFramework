@@ -1,8 +1,10 @@
+import configurations.genericsRepositories.RepositoryFactory;
 import configurations.orm.EntityManager;
 import configurations.routes.RouterRegister;
 import configurations.Server;
 import controllers.ControllerTeste;
 import controllers.ProdutoController;
+import entities.Product;
 import repositories.ProductRepository;
 import repositories.UserRepository;
 import services.ProdutoService;
@@ -21,7 +23,8 @@ public class ZardFrameworkApplication {
 
 		// 1. Cria o repositório para Users
 		UserRepository  userRepository = new UserRepository();
-		ProductRepository repository = new ProductRepository();
+		ProductRepository repository = RepositoryFactory.createRepository(ProductRepository.class, Product.class);
+
 
 
 		// 2. Cria o UserService, passando o repositório

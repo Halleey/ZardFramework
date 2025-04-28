@@ -143,4 +143,8 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
             throw new RuntimeException(e);
         }
     }
+    public Class<T> getEntityClass() {
+        return entityClass;
+    }
+
 }

@@ -1,13 +1,16 @@
 package controllers;
 
+import configurations.routes.GetRouter;
 import dtos.ProductRequestDto;
 import entities.JsonUtils;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.routes.PostRouter;
+import entities.Product;
 import services.ProdutoService;
 
 import java.io.IOException;
+import java.util.List;
 
 public class ProdutoController {
 
@@ -27,4 +30,15 @@ public class ProdutoController {
         response.send("Produto salvo");
 
     }
+    @GetRouter("/product")
+    public void getProduct(Request request, Response response) throws IOException {
+        String nome = request.getQueryParam("nome");
+
+        List<Product> products = produtoService.getProduct(nome);
+
+        String json = JsonUtils.toJson(products);
+
+        response.send(json);
+    }
+
 }
