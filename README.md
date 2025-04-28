@@ -1,5 +1,7 @@
 # ZardFramework - Exemplo de CRUD básico
 
+*Um mini framework para web, para aprender mais a fundo como os demais operam, sem fins lucrativos, sinta-se livre para utilizar e aprender junto*
+
 Este é um exemplo básico de um CRUD usando o **ZardFramework**, com base no que montamos até agora.
 
 Inclui:
