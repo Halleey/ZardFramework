@@ -14,7 +14,6 @@ public class UserService {
 
     public void createUser(String name, String email, String cpf) {
         Users user = new Users();
-        user.setId(System.currentTimeMillis()); // Exemplo: gera ID automático
         user.setName(name);
         user.setEmail(email);
         user.setCpf(cpf);
