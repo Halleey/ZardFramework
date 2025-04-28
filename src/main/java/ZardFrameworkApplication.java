@@ -1,5 +1,5 @@
-import configurations.EntityManager;
-import configurations.RouterRegister;
+import configurations.orm.EntityManager;
+import configurations.routes.RouterRegister;
 import configurations.Server;
 import controllers.ControllerTeste;
 import controllers.ProdutoController;

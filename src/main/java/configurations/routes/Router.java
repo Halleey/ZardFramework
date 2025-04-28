@@ -1,6 +1,6 @@
-package configurations;
+package configurations.routes;
 
-import handlers.RequestHandler;
+import configurations.handlers.RequestHandler;
 
 import java.util.HashMap;
 import java.util.Map;

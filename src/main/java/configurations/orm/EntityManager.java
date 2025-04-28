@@ -1,9 +1,9 @@
-package configurations;
+package configurations.orm;
 
 
-import dbas.Column;
-import dbas.Entity;
-import dbas.Id;
+import configurations.dbas.Column;
+import configurations.dbas.Entity;
+import configurations.dbas.Id;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;

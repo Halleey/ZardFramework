@@ -1,7 +1,7 @@
-package handlers;
+package configurations.handlers;
 
-import requests.Request;
-import requests.Response;
+import configurations.requests.Request;
+import configurations.requests.Response;
 
 import java.io.IOException;
 

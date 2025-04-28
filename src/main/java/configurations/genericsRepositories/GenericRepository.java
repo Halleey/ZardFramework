@@ -1,4 +1,4 @@
-package repositories;
+package configurations.genericsRepositories;
 
 import java.util.List;
 import java.util.Optional;

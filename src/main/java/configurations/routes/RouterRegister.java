@@ -1,9 +1,7 @@
-package configurations;
+package configurations.routes;
 
-import routes.DeleteRouter;
-import routes.GetRouter;
-import routes.PostRouter;
-import handlers.RequestHandler;
+import configurations.Server;
+import configurations.handlers.RequestHandler;
 
 import java.lang.reflect.Method;
 

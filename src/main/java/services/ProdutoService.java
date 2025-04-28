@@ -1,5 +1,6 @@
 package services;
 
+import dtos.ProductRequestDto;
 import entities.Product;
 import repositories.ProductRepository;
 
@@ -13,11 +14,11 @@ public class ProdutoService {
 
     }
 
-    public void saveProduct(String nome, double price) {
+    public void saveProduct(ProductRequestDto productRequestDto) {
 
         Product product = new Product();
-        product.setNome(nome);
-        product.setPrice(price);
+        product.setNome(productRequestDto.getNome());
+        product.setPrice(productRequestDto.getPrice());
         repository.save(product);
     }
 }

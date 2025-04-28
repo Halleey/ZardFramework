@@ -1,8 +1,8 @@
 package entities;
 
-import dbas.Column;
-import dbas.Entity;
-import dbas.Id;
+import configurations.dbas.Column;
+import configurations.dbas.Entity;
+import configurations.dbas.Id;
 
 @Entity
 public class Product {

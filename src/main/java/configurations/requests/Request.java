@@ -1,4 +1,4 @@
-package requests;
+package configurations.requests;
 
 import com.sun.net.httpserver.HttpExchange;
 

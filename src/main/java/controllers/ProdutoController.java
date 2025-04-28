@@ -1,10 +1,10 @@
 package controllers;
 
+import dtos.ProductRequestDto;
 import entities.JsonUtils;
-import entities.Product;
-import requests.Request;
-import requests.Response;
-import routes.PostRouter;
+import configurations.requests.Request;
+import configurations.requests.Response;
+import configurations.routes.PostRouter;
 import services.ProdutoService;
 
 import java.io.IOException;
@@ -22,8 +22,8 @@ public class ProdutoController {
 
         String body = request.getBody();
 
-        Product product = JsonUtils.fromJson(body, Product.class);
-        produtoService.saveProduct(product.getNome(), product.getPrice());
+        ProductRequestDto product = JsonUtils.fromJson(body, ProductRequestDto.class);
+        produtoService.saveProduct(product);
         response.send("Produto salvo");
 
     }

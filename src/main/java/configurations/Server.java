@@ -2,9 +2,10 @@ package configurations;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
-import handlers.RequestHandler;
-import requests.Request;
-import requests.Response;
+import configurations.routes.Router;
+import configurations.handlers.RequestHandler;
+import configurations.requests.Request;
+import configurations.requests.Response;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;

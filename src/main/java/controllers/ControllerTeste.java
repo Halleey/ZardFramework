@@ -3,11 +3,11 @@ package controllers;
 import entities.JsonUtils;
 import dtos.UserRequestDto;
 import entities.Users;
-import routes.DeleteRouter;
-import routes.GetRouter;
-import requests.Request;
-import requests.Response;
-import routes.PostRouter;
+import configurations.routes.DeleteRouter;
+import configurations.routes.GetRouter;
+import configurations.requests.Request;
+import configurations.requests.Response;
+import configurations.routes.PostRouter;
 import services.UserService;
 
 import java.io.IOException;

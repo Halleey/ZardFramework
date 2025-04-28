@@ -1,8 +1,8 @@
-package repositories;
+package configurations.genericsRepositories;
 
-import configurations.ConnectionPool;
-import dbas.Column;
-import dbas.Id;
+import configurations.orm.ConnectionPool;
+import configurations.dbas.Column;
+import configurations.dbas.Id;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
