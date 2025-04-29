@@ -14,7 +14,7 @@ import services.ProdutoService;
 import java.io.IOException;
 import java.util.List;
 
-@RequestController("/main")
+@RequestController("/products")
 public class ProdutoController {
 
     private final ProdutoService produtoService;
@@ -23,7 +23,7 @@ public class ProdutoController {
         this.produtoService = produtoService;
     }
 
-    @PostRouter("/product")
+    @PostRouter("")
     public void saveProduct(Request request, Response response) throws IOException {
 
         String body = request.getBody();
@@ -33,7 +33,7 @@ public class ProdutoController {
         response.send("Produto salvo");
 
     }
-    @GetRouter("/product")
+    @GetRouter("")
     public void getProduct(Request request, Response response) throws IOException {
         String nome = request.getQueryParam("nome");
 

@@ -1,5 +1,6 @@
 package controllers;
 
+import configurations.routes.RequestController;
 import entities.JsonUtils;
 import dtos.UserRequestDto;
 import entities.Users;
@@ -9,10 +10,10 @@ import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.routes.PostRouter;
 import services.UserService;
-
 import java.io.IOException;
 import java.util.List;
 
+@RequestController("/user")
 public class ControllerTeste {
 
     private final UserService service;
@@ -21,10 +22,12 @@ public class ControllerTeste {
         this.service = service;
     }
 
-    @GetRouter("/v2")
+    @GetRouter("")
     public String helloHandler()  {
         return "Lets go !";
     }
+
+
 
     @GetRouter("/all")
     public String getAll() {
@@ -37,7 +40,7 @@ public class ControllerTeste {
        return JsonUtils.toJson(usersList);
     }
 
-    @DeleteRouter("/delete")
+    @DeleteRouter("")
     public void deleteUser(Request req, Response res) throws IOException {
         String idStr = req.extractPathParam("/delete");
         Long id = Long.valueOf(idStr);
@@ -51,7 +54,7 @@ public class ControllerTeste {
         }
     }
 
-    @PostRouter("/save")
+    @PostRouter("")
     public void saveUser(Request req, Response res) throws IOException {
         String body = req.getBody(); // JSON vindo no body
 

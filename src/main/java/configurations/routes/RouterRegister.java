@@ -10,18 +10,7 @@ import java.lang.reflect.Method;
 public class RouterRegister {
     public static void registerRoutes(Server server, Object controller) {
         Class<?> controllerClass = controller.getClass();
-        String basePath = "";
-
-        if (controllerClass.isAnnotationPresent(RequestController.class)) {
-            RequestController annotation = controllerClass.getAnnotation(RequestController.class);
-            basePath = annotation.value();
-            if (!basePath.startsWith("/")) {
-                basePath = "/" + basePath;
-            }
-            if (basePath.endsWith("/")) {
-                basePath = basePath.substring(0, basePath.length() - 1); // Remove barra final
-            }
-        }
+        String basePath = getBasePath(controllerClass);
 
         Method[] methods = controllerClass.getDeclaredMethods();
         for (Method method : methods) {
@@ -46,6 +35,22 @@ public class RouterRegister {
                 server.patch(path, createHandler(controller, method));
  }
         }
+    }
+
+    private static String getBasePath(Class<?> controllerClass) {
+        String basePath = "";
+
+        if (controllerClass.isAnnotationPresent(RequestController.class)) {
+            RequestController annotation = controllerClass.getAnnotation(RequestController.class);
+            basePath = annotation.value();
+            if (!basePath.startsWith("/")) {
+                basePath = "/" + basePath;
+            }
+            if (basePath.endsWith("/")) {
+                basePath = basePath.substring(0, basePath.length() - 1); // Remove barra final
+            }
+        }
+        return basePath;
     }
 
     private static String combinePaths(String basePath, String value) {
