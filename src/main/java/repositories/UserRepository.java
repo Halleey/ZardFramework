@@ -1,12 +1,9 @@
 package repositories;
 
+import configurations.genericsRepositories.GenericRepository;
 import entities.Users;
-import configurations.genericsRepositories.GenericRepositoryImpl;
-
-public class UserRepository extends GenericRepositoryImpl<Users, Long> {
 
 
-    public UserRepository() {
-        super(Users.class);
-    }
+public interface UserRepository extends GenericRepository<Users, Long> {
+
 }

@@ -9,8 +9,6 @@ public class JsonUtils {
             .setPrettyPrinting()
             .serializeNulls()
             .create();
-
-
     public static <T> T fromJson(String json, Class<T> clazz) {
         if (json == null || json.isBlank()) {
             return null;
@@ -21,7 +19,6 @@ public class JsonUtils {
             return null;
         }
     }
-
     public static String toJson(Object obj) {
         return gson.toJson(obj);
     }

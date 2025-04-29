@@ -2,6 +2,7 @@ package controllers;
 
 import configurations.routes.GetRouter;
 import configurations.routes.PatchRouter;
+import configurations.routes.RequestController;
 import dtos.ProductRequestDto;
 import entities.JsonUtils;
 import configurations.requests.Request;
@@ -13,6 +14,7 @@ import services.ProdutoService;
 import java.io.IOException;
 import java.util.List;
 
+@RequestController("/main")
 public class ProdutoController {
 
     private final ProdutoService produtoService;
@@ -42,7 +44,7 @@ public class ProdutoController {
         response.send(json);
     }
 
-    @PatchRouter("/product")
+    @PatchRouter("")
     public void updateProductName(Request request, Response response) throws IOException {
         // Captura o id e o novo nome da requisição
         String idParam = request.getQueryParam("id");
