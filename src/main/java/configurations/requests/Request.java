@@ -31,15 +31,20 @@ public class Request {
 
 
     public String extractPathParam(String basePath) {
-        String path = getPath();
-        if (path.startsWith(basePath)) {
-            String[] parts = path.split("/");
-            if (parts.length > 2) {
-                return parts[2]; // Pega o valor após /delete/
-            }
+        String fullPath = getPath(); // ex: /user/delete/4
+        if (!fullPath.startsWith(basePath)) return null;
+
+        // Remove a basePath da URL
+        String remaining = fullPath.substring(basePath.length());
+        if (remaining.startsWith("/")) {
+            remaining = remaining.substring(1);
         }
-        return null;
+
+        // Retorna o primeiro segmento após o basePath
+        String[] parts = remaining.split("/");
+        return parts.length > 0 ? parts[0] : null;
     }
+
     // Novo método para pegar parâmetros da query string
     public String getQueryParam(String key) {
         String query = exchange.getRequestURI().getQuery();

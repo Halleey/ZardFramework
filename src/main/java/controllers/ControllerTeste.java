@@ -28,7 +28,6 @@ public class ControllerTeste {
     }
 
 
-
     @GetRouter("/all")
     public String getAll() {
         // Chama o serviço para pegar todos os usuários
@@ -40,9 +39,9 @@ public class ControllerTeste {
        return JsonUtils.toJson(usersList);
     }
 
-    @DeleteRouter("")
+    @DeleteRouter("/delete")
     public void deleteUser(Request req, Response res) throws IOException {
-        String idStr = req.extractPathParam("/delete");
+        String idStr = req.extractPathParam("/user/delete");
         Long id = Long.valueOf(idStr);
 
         boolean deleted = service.deleteUser(id);
@@ -54,7 +53,7 @@ public class ControllerTeste {
         }
     }
 
-    @PostRouter("")
+    @PostRouter("/save")
     public void saveUser(Request req, Response res) throws IOException {
         String body = req.getBody(); // JSON vindo no body
 
