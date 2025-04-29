@@ -162,7 +162,7 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
         }
 
         sql.append(String.join(", ", setClauses));
-        sql.append(" WHERE " + idField.getName() + " = ?");
+        sql.append(" WHERE ").append(idField.getName()).append(" = ?");
 
         try (Connection conn = ConnectionPool.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql.toString())) {

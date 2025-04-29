@@ -22,8 +22,8 @@ public class ControllerTeste {
     }
 
     @GetRouter("/v2")
-    public void helloHandler(Request req, Response res) throws IOException {
-        res.send("Lets go !");
+    public String helloHandler()  {
+        return "Lets go !";
     }
 
     @GetRouter("/all")
