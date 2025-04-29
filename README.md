@@ -13,7 +13,7 @@ Inclui:
 - Além de notations :Onde apenas com @ podemos definir funcionalidades.
 ---
 
-## Anotações Utilizadas
+## Algumas das Anotações Utilizadas.
 
 ### **@Target(ElementType.METHOD)**
 A anotação `@Target` define o tipo de elemento onde a anotação pode ser aplicada. No caso de `@GetRouter` e `@PostRouter`, elas podem ser aplicadas **apenas em métodos**.
@@ -132,32 +132,61 @@ _(Obs: no seu código fonte, cada método se encontra completo, de cada um desse
 
 ---
 
-### 3. Service: UserService
+### 3. Criação da interface para injetar o repositorio
+
+```java
+public interface ProductRepository extends GenericRepository<Product, Long> {
+
+    @Querys("SELECT * FROM product WHERE nome = ?")
+    List<Product> findByName(String name);
+}
+
+```
+
+
+### 4. Service: UserService
 
 ```java
 public class UserService {
-  private final GenericRepository<Users, Long> genericRepository;
 
-  public UserService(GenericRepository<Users, Long> genericRepository) {
-    this.genericRepository = genericRepository;
+  private final UserRepository repository;
+
+  public UserService(UserRepository repository) {
+    this.repository = repository;
   }
 
-  public void createUser(String name, String email, String cpf) {
+  public void createUser(UserRequestDto  requestDto) {
     Users user = new Users();
-    user.setId(System.currentTimeMillis()); // Gera ID automático
-    user.setName(name);
-    user.setEmail(email);
-    user.setCpf(cpf);
-    genericRepository.save(user);
+    user.setName(requestDto.getName());
+    user.setEmail(requestDto.getEmail());
+    user.setCpf(requestDto.getCpf());
+    repository.save(user);
+  }
+
+  public List<Users> getAll() {
+    return repository.findAll();
+
+  }
+
+  public boolean deleteUser(Long id) {
+    Optional<Users> user = repository.findById(id);
+    if (user.isPresent()) {
+      repository.deleteById(id);
+      return true;
+    } else {
+      return false;
+    }
   }
 }
 ```
 
 ---
 
-### 4. Controller: ControllerTeste
+### 5. Controller: ControllerTeste
 
 ```java
+
+@RequestController("/user")
 public class ControllerTeste {
 
   private final UserService service;
@@ -166,29 +195,58 @@ public class ControllerTeste {
     this.service = service;
   }
 
-  @GetRouter("/v2")
-  public void helloHandler(Request req, Response res) throws IOException {
-    res.send("Let's go!");
+  @GetRouter("")
+  public String helloHandler()  {
+    return "Lets go !";
+  }
+
+
+  @GetRouter("/all")
+  public String getAll() {
+    // Chama o serviço para pegar todos os usuários
+    List<Users> usersList = service.getAll();
+
+    // Converte a lista de usuários para JSON
+
+    // Envia a resposta com a lista de usuários
+    return JsonUtils.toJson(usersList);
+  }
+
+  @DeleteRouter("/delete")
+  public void deleteUser(Request req, Response res) throws IOException {
+    String idStr = req.extractPathParam("/user/delete");
+    Long id = Long.valueOf(idStr);
+
+    boolean deleted = service.deleteUser(id);
+
+    if (deleted) {
+      res.send("Usuário deletado com sucesso!");
+    } else {
+      res.send("Usuário não encontrado!");
+    }
   }
 
   @PostRouter("/save")
   public void saveUser(Request req, Response res) throws IOException {
-    String body = req.getBody();
+    String body = req.getBody(); // JSON vindo no body
 
-    Users user = JsonUtils.fromJson(body, Users.class); // Converte JSON para objeto
+    UserRequestDto user = JsonUtils.fromJson(body, UserRequestDto.class); // transforma JSON -> Users
 
-    service.createUser(user.getName(), user.getEmail(), user.getCpf());
+    service.createUser(user); // chama o service certinho
 
     res.send("Usuário salvo!");
   }
 }
+
+
 ```
 
 ---
 
-### 5. Inicialização: ZardFrameworkApplication
+### 6. Inicialização: ZardFrameworkApplication
 
 ```java
+
 
 public class ZardFrameworkApplication {
   public static void main(String[] args) throws IOException {
@@ -199,13 +257,18 @@ public class ZardFrameworkApplication {
 
 
     // 1. Cria o repositório para Users
-    GenericRepository<Users, Long> userRepository = new GenericRepositoryImpl<>(Users.class);
+    UserRepository  userRepository = RepositoryFactory.createRepository(UserRepository.class, Users.class);
+    ProductRepository repository = RepositoryFactory.createRepository(ProductRepository.class, Product.class);
 
     // 2. Cria o UserService, passando o repositório
     UserService userService = new UserService(userRepository);
+    ProdutoService produtoService = new ProdutoService(repository);
+
 
     // 3. Cria o ControllerTeste, passando o UserService
     ControllerTeste controllerTeste = new ControllerTeste(userService);
+    ProdutoController produtoController = new  ProdutoController(produtoService);
+    RouterRegister.registerRoutes(app, produtoController);
     RouterRegister.registerRoutes(app, controllerTeste);
 
     app.start();
@@ -217,7 +280,7 @@ public class ZardFrameworkApplication {
 
 ## Testando as Rotas
 
-- `GET /v2`
+- `GET /user`
   - Resposta: `"Let's go!"`
 
 - `POST /save`
