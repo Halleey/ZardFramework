@@ -6,6 +6,7 @@ import configurations.requests.Request;
 import configurations.requests.Response;
 
 import java.lang.reflect.Method;
+
 public class RouterRegister {
     public static void registerRoutes(Server server, Object controller) {
         Method[] methods = controller.getClass().getDeclaredMethods();

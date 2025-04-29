@@ -27,7 +27,7 @@ public class ControllerTeste {
     }
 
     @GetRouter("/all")
-    public void getAll(Request request, Response response) throws  IOException{
+    public String getAll() throws  IOException{
         // Chama o serviço para pegar todos os usuários
         List<Users> usersList = service.getAll();
 
@@ -35,7 +35,7 @@ public class ControllerTeste {
         String jsonResponse = JsonUtils.toJson(usersList);
 
         // Envia a resposta com a lista de usuários
-        response.send(jsonResponse);
+       return jsonResponse;
     }
 
     @DeleteRouter("/delete")
