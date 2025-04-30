@@ -1,5 +1,6 @@
 package configurations.genericsRepositories;
 
+import configurations.dbas.OneToOne;
 import configurations.orm.ConnectionPool;
 import configurations.dbas.Column;
 import configurations.dbas.Id;

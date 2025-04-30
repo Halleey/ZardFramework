@@ -1,8 +1,10 @@
 package services;
 
 import dtos.UserRequestDto;
+
 import entities.Users;
 
+import repositories.AddressRepository;
 import repositories.UserRepository;
 
 import java.util.List;
@@ -14,6 +16,7 @@ public class UserService {
 
     public UserService(UserRepository repository) {
         this.repository = repository;
+
     }
 
     public void createUser(UserRequestDto  requestDto) {
@@ -21,6 +24,7 @@ public class UserService {
         user.setName(requestDto.getName());
         user.setEmail(requestDto.getEmail());
         user.setCpf(requestDto.getCpf());
+
         repository.save(user);
     }
 
@@ -38,4 +42,5 @@ public class UserService {
             return false;
         }
     }
+
 }

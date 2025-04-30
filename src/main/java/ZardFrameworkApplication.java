@@ -4,10 +4,13 @@ import configurations.routes.RouterRegister;
 import configurations.Server;
 import controllers.ControllerTeste;
 import controllers.ProdutoController;
+import entities.Address;
 import entities.Product;
 import entities.Users;
+import repositories.AddressRepository;
 import repositories.ProductRepository;
 import repositories.UserRepository;
+import services.AddressService;
 import services.ProdutoService;
 import services.UserService;
 
@@ -25,17 +28,19 @@ public class ZardFrameworkApplication {
 		// 1. Cria o repositório para Users
 		UserRepository  userRepository = RepositoryFactory.createRepository(UserRepository.class, Users.class);
 		ProductRepository repository = RepositoryFactory.createRepository(ProductRepository.class, Product.class);
-
+		AddressRepository addressRepository = RepositoryFactory.createRepository(AddressRepository.class, Address.class);
 		// 2. Cria o UserService, passando o repositório
 		UserService userService = new UserService(userRepository);
 		ProdutoService produtoService = new ProdutoService(repository);
-
+		AddressService addressService = new AddressService(addressRepository);
 
 		// 3. Cria o ControllerTeste, passando o UserService
 		ControllerTeste controllerTeste = new ControllerTeste(userService);
 		ProdutoController produtoController = new  ProdutoController(produtoService);
 		RouterRegister.registerRoutes(app, produtoController);
 		RouterRegister.registerRoutes(app, controllerTeste);
+
+
 
 		app.start();
 	}

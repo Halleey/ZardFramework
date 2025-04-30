@@ -3,8 +3,9 @@ package entities;
 import configurations.dbas.Column;
 import configurations.dbas.Entity;
 import configurations.dbas.Id;
+import configurations.dbas.OneToOne;
 
-@Entity
+@Entity()
 public class Users {
     @Id
     long id;
@@ -14,6 +15,17 @@ public class Users {
     String email;
     @Column
     String cpf;
+    //fix this, generate table with notation name
+    @OneToOne(referencedColumnName = "address_id")
+    Address address;
+
+    public Address getAddress() {
+        return address;
+    }
+
+    public void setAddress(Address address) {
+        this.address = address;
+    }
 
     public long getId() {
         return id;
