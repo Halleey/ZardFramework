@@ -4,10 +4,14 @@ public class UserRequestDto {
     String name;
     String email;
     String cpf;
-    private Long addressId;
+    private Long address_id;
 
-    public Long getAddressId() {
-        return addressId;
+    public Long getAddress_id() {
+        return address_id;
+    }
+
+    public void setAddress_id(Long address_id) {
+        this.address_id = address_id;
     }
 
     public String getName() {

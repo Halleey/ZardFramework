@@ -1,5 +1,5 @@
 package configurations.genericsRepositories;
-
+import configurations.dbas.Entity;
 import configurations.dbas.OneToOne;
 import configurations.orm.ConnectionPool;
 import configurations.dbas.Column;
@@ -22,25 +22,34 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
     private final String tableName;
     private final Field idField;
     private final List<Field> columnFields;
+    private final List<Field> relationFields;
 
     public GenericRepositoryImpl(Class<T> entityClass) {
         this.entityClass = entityClass;
         this.tableName = entityClass.getSimpleName().toLowerCase();
 
-        // Descobre qual campo é o ID
+        /*
+         Percorre todos os campos da entidade, realiza o filtro e retorna somente o que for necessario em formato de lista
+         */
         this.idField = Arrays.stream(entityClass.getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(Id.class))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Entidade " + entityClass.getSimpleName() + " não tem @Id"));
 
-        // Descobre todos os campos @Column
+        // Campos simples (colunas + id)
         this.columnFields = Arrays.stream(entityClass.getDeclaredFields())
                 .filter(f -> f.isAnnotationPresent(Column.class) || f.isAnnotationPresent(Id.class))
+                .collect(Collectors.toList());
+
+        // Campos de relacionamento
+        this.relationFields = Arrays.stream(entityClass.getDeclaredFields())
+                .filter(f -> f.isAnnotationPresent(OneToOne.class))
                 .collect(Collectors.toList());
 
         // Permitir acesso a campos privados
         this.idField.setAccessible(true);
         this.columnFields.forEach(f -> f.setAccessible(true));
+        this.relationFields.forEach(f -> f.setAccessible(true));
     }
 
     @Override
@@ -50,13 +59,40 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
         List<String> placeholders = new ArrayList<>();
         List<Object> values = new ArrayList<>();
 
+        // Campos simples (nome, email, etc)
         for (Field field : columnFields) {
             columns.add(field.getName());
             placeholders.add("?");
             try {
                 values.add(field.get(entity));
             } catch (IllegalAccessException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("Erro ao acessar campo: " + field.getName(), e);
+            }
+        }
+
+        // Campos de relacionamento (fk)
+        for (Field relationField : relationFields) {
+            String columnName = relationField.getName() + "_id"; // ex: address -> address_id
+            columns.add(columnName);
+            placeholders.add("?");
+
+            try {
+                Object relatedEntity = relationField.get(entity);
+                if (relatedEntity != null) {
+                    Field relatedId = Arrays.stream(relatedEntity.getClass().getDeclaredFields())
+                            .filter(f -> f.isAnnotationPresent(Id.class))
+                            .findFirst()
+                            .orElseThrow(() -> new RuntimeException("Entidade relacionada " +
+                                    relatedEntity.getClass().getSimpleName() + " não tem @Id"));
+
+                    relatedId.setAccessible(true);
+                    Object fkValue = relatedId.get(relatedEntity);
+                    values.add(fkValue);
+                } else {
+                    values.add(null);
+                }
+            } catch (Exception e) {
+                throw new RuntimeException("Erro ao processar relacionamento: " + relationField.getName(), e);
             }
         }
 
@@ -183,5 +219,4 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
     public Class<T> getEntityClass() {
         return entityClass;
     }
-
 }

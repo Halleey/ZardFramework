@@ -54,4 +54,16 @@ public class DependencyResolver {
 
         return true;
     }
+    /*
+    DFS ou Depth-First Search
+    Começa em Pedido
+
+    Vê que Pedido depende de Usuário
+
+    Vai para Usuário, que depende de Endereço
+
+    Vai para Endereço (sem dependência)
+
+    Então volta: cria Endereço, depois Usuário, depois Pedido
+     */
 }

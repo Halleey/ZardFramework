@@ -30,7 +30,7 @@ public class ZardFrameworkApplication {
 		ProductRepository repository = RepositoryFactory.createRepository(ProductRepository.class, Product.class);
 		AddressRepository addressRepository = RepositoryFactory.createRepository(AddressRepository.class, Address.class);
 		// 2. Cria o UserService, passando o repositório
-		UserService userService = new UserService(userRepository);
+		UserService userService = new UserService(userRepository, addressRepository);
 		ProdutoService produtoService = new ProdutoService(repository);
 		AddressService addressService = new AddressService(addressRepository);
 
