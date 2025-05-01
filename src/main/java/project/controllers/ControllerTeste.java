@@ -33,16 +33,29 @@ public class ControllerTeste {
         return ResponseEntity.ok("Hello, luc");
     }
 
+    //Versãoc Arcaica
+
     @GetRouter("/all")
     public String getAll() {
         // Chama o serviço para pegar todos os usuários
         List<Users> usersList = service.getAll();
-
-        // Converte a lista de usuários para JSON
-
         // Envia a resposta com a lista de usuários
        return JsonUtils.toJson(usersList);
     }
+
+    //Versãoc com ResponseEntity
+
+    @GetRouter("/todos")
+    public ResponseEntity<String> pegatodos() {
+        // Chama o serviço para pegar todos os usuários
+        List<Users> usersList = service.getAll();
+
+        // Converte a lista de usuários para JSON
+        String jsonResponse = JsonUtils.toJson(usersList);
+        // Envia a resposta com a lista de usuários
+        return ResponseEntity.ok(jsonResponse);
+    }
+
 
     @DeleteRouter("/delete")
     public void deleteUser(Request req, Response res) throws IOException {
@@ -58,6 +71,7 @@ public class ControllerTeste {
         }
     }
 
+    //SAVE USER NEW MODEL
     @PostRouter("/save")
     public ResponseEntity<String> saveUser(Request req) throws IOException {
         String body = req.getBody(); // JSON vindo no body
@@ -66,8 +80,21 @@ public class ControllerTeste {
 
         service.createUser(user); // chama o service certinho
 
-        return ResponseEntity.created("Usuário criado com sucesso");
+        return ResponseEntity.status(201, "Salvando no novo modelo");
     }
+
+    //SAVE USER OLD MODEL
+    @PostRouter("/salvar")
+    public void salvarVelho(Request req, Response response) throws IOException {
+        String body = req.getBody(); // JSON vindo no body
+
+        UserRequestDto user = JsonUtils.fromJson(body, UserRequestDto.class); // transforma JSON -> Users
+
+        service.createUser(user); // chama o service certinho
+        response.send("Salvando da forma velha");
+    }
+
+
 }
 
 
