@@ -1,8 +1,8 @@
-package services;
+package project.services;
 
-import dtos.AddresRequestDto;
+import project.dtos.AddresRequestDto;
 import entities.Address;
-import repositories.AddressRepository;
+import project.repositories.AddressRepository;
 
 public class AddressService {
     private  final AddressRepository addressRepository;

@@ -4,8 +4,10 @@ import configurations.Server;
 import configurations.handlers.RequestHandler;
 import configurations.requests.Request;
 import configurations.requests.Response;
+import configurations.responses.ResponseEntity;
 
 import java.lang.reflect.Method;
+import java.util.Map;
 
 public class RouterRegister {
     public static void registerRoutes(Server server, Object controller) {
@@ -72,28 +74,39 @@ public class RouterRegister {
                 Object result;
 
                 if (parameterTypes.length == 0) {
-                    // Sem parâmetros, apenas invoca
                     result = method.invoke(controller);
+                } else if (parameterTypes.length == 1 && parameterTypes[0] == Request.class) {
+                    // Suporta métodos com apenas o Request
+                    result = method.invoke(controller, req);
                 } else if (parameterTypes.length == 2
                         && parameterTypes[0] == Request.class
                         && parameterTypes[1] == Response.class) {
-                    // Com Request e Response, invoca passando os objetos
                     method.invoke(controller, req, res);
-                    return; // já lidou com a resposta manualmente
+                    return;
                 } else {
                     throw new IllegalStateException("Assinatura do método inválida: " + method.getName());
                 }
 
                 // Se o método retornar algo, envia como resposta
                 if (result != null) {
-                    res.send(result.toString());
+                    if (result instanceof ResponseEntity<?> entity) {
+                        res.setStatus(entity.getStatusCode());
+                        for (Map.Entry<String, String> header : entity.getHeaders().entrySet()) {
+                            res.setHeader(header.getKey(), header.getValue());
+                        }
+                        Object body = entity.getBody();
+                        res.send(body != null ? body.toString() : "");
+                    } else {
+                        res.send(result.toString());
+                    }
                 } else {
-                    res.send(""); // Retorno vazio
+                    res.send(""); // método void ou retorno nulo
                 }
+
             } catch (Exception e) {
-                e.printStackTrace();
                 res.send(500, "Erro interno no servidor");
             }
         };
     }
+
 }

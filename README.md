@@ -257,7 +257,7 @@ public class ZardFrameworkApplication {
 
 
     // 1. Cria o repositório para Users
-    UserRepository  userRepository = RepositoryFactory.createRepository(UserRepository.class, Users.class);
+    UserRepository userRepository = RepositoryFactory.createRepository(UserRepository.class, Users.class);
     ProductRepository repository = RepositoryFactory.createRepository(ProductRepository.class, Product.class);
 
     // 2. Cria o UserService, passando o repositório
@@ -267,7 +267,7 @@ public class ZardFrameworkApplication {
 
     // 3. Cria o ControllerTeste, passando o UserService
     ControllerTeste controllerTeste = new ControllerTeste(userService);
-    ProdutoController produtoController = new  ProdutoController(produtoService);
+    ProdutoController produtoController = new ProdutoController(produtoService);
     RouterRegister.registerRoutes(app, produtoController);
     RouterRegister.registerRoutes(app, controllerTeste);
 

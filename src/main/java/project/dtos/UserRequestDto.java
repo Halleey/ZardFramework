@@ -1,4 +1,4 @@
-package dtos;
+package project.dtos;
 
 public class UserRequestDto {
     String name;

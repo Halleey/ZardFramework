@@ -1,17 +1,19 @@
-package controllers;
+package project.controllers;
 
+import configurations.responses.ResponseEntity;
 import configurations.routes.RequestController;
 import entities.JsonUtils;
-import dtos.UserRequestDto;
+import project.dtos.UserRequestDto;
 import entities.Users;
 import configurations.routes.DeleteRouter;
 import configurations.routes.GetRouter;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.routes.PostRouter;
-import services.UserService;
+import project.services.UserService;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RequestController("/user")
 public class ControllerTeste {
@@ -26,7 +28,10 @@ public class ControllerTeste {
     public String helloHandler()  {
         return "Lets go !";
     }
-
+    @GetRouter("/hello")
+    public ResponseEntity<String> hello() {
+        return ResponseEntity.ok("Hello, luc");
+    }
 
     @GetRouter("/all")
     public String getAll() {
@@ -54,14 +59,14 @@ public class ControllerTeste {
     }
 
     @PostRouter("/save")
-    public void saveUser(Request req, Response res) throws IOException {
+    public ResponseEntity<String> saveUser(Request req) throws IOException {
         String body = req.getBody(); // JSON vindo no body
 
         UserRequestDto user = JsonUtils.fromJson(body, UserRequestDto.class); // transforma JSON -> Users
 
         service.createUser(user); // chama o service certinho
 
-        res.send("Usuário salvo!");
+        return ResponseEntity.created("Usuário criado com sucesso");
     }
 }
 

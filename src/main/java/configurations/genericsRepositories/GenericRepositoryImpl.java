@@ -58,7 +58,6 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
         List<String> columns = new ArrayList<>();
         List<String> placeholders = new ArrayList<>();
         List<Object> values = new ArrayList<>();
-
         // Campos simples (nome, email, etc)
         for (Field field : columnFields) {
             columns.add(field.getName());

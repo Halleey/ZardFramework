@@ -1,8 +1,8 @@
-package services;
+package project.services;
 
-import dtos.ProductRequestDto;
+import project.dtos.ProductRequestDto;
 import entities.Product;
-import repositories.ProductRepository;
+import project.repositories.ProductRepository;
 
 import java.util.List;
 

@@ -1,15 +1,15 @@
-package controllers;
+package project.controllers;
 
 import configurations.routes.GetRouter;
 import configurations.routes.PatchRouter;
 import configurations.routes.RequestController;
-import dtos.ProductRequestDto;
+import project.dtos.ProductRequestDto;
 import entities.JsonUtils;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.routes.PostRouter;
 import entities.Product;
-import services.ProdutoService;
+import project.services.ProdutoService;
 
 import java.io.IOException;
 import java.util.List;

@@ -1,4 +1,4 @@
-package repositories;
+package project.repositories;
 
 import configurations.genericsRepositories.GenericRepository;
 import entities.Address;

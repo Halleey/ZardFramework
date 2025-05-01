@@ -2,17 +2,17 @@ import configurations.genericsRepositories.RepositoryFactory;
 import configurations.orm.EntityManager;
 import configurations.routes.RouterRegister;
 import configurations.Server;
-import controllers.ControllerTeste;
-import controllers.ProdutoController;
+import project.controllers.ControllerTeste;
+import project.controllers.ProdutoController;
 import entities.Address;
 import entities.Product;
 import entities.Users;
-import repositories.AddressRepository;
-import repositories.ProductRepository;
-import repositories.UserRepository;
-import services.AddressService;
-import services.ProdutoService;
-import services.UserService;
+import project.repositories.AddressRepository;
+import project.repositories.ProductRepository;
+import project.repositories.UserRepository;
+import project.services.AddressService;
+import project.services.ProdutoService;
+import project.services.UserService;
 
 import java.io.IOException;
 

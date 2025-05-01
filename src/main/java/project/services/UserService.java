@@ -1,12 +1,12 @@
-package services;
+package project.services;
 
-import dtos.UserRequestDto;
+import project.dtos.UserRequestDto;
 
 import entities.Address;
 import entities.Users;
 
-import repositories.AddressRepository;
-import repositories.UserRepository;
+import project.repositories.AddressRepository;
+import project.repositories.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
@@ -35,6 +35,11 @@ public class UserService {
     public List<Users> getAll() {
       return repository.findAll();
 
+    }
+
+    //fix controller for support with get params
+    public Optional<Users> getUser(Long id){
+        return repository.findById(id);
     }
 
     public boolean deleteUser(Long id) {
