@@ -74,15 +74,12 @@ public class ControllerTeste {
 
     @GetRouter("/find")
     public ResponseEntity<String> findId(Request request) {
-        System.out.println("DEBUG: URL recebida: " + request.getPath());
         String idStr = request.extractPathParam("/user/find");
-        System.out.println("DEBUG: ID extraído: " + idStr);
-
         Long  address_id = Long.valueOf(idStr);
         System.out.println("DEBUG: ID convertido para Long: " + address_id);
 
         List<Users> users = service.getUserById(address_id);
-        System.out.println("DEBUG: Resultado do service: " + users);
+
 
         String json = JsonUtils.toJson(users);
         System.out.println("DEBUG: JSON gerado: " + json);
@@ -91,7 +88,23 @@ public class ControllerTeste {
         return ResponseEntity.ok(json);
     }
 
+    @GetRouter("/equals")
+    public ResponseEntity<String> getEqualsName(Request request) {
+        // Extrai o parâmetro "name" da query string
+        String name = request.getQueryParam("name");
 
+        if (name == null || name.isBlank()) {
+            return ResponseEntity.status(400, "Parâmetro 'name' é obrigatório");
+        }
+
+        List<Users> users = service.getUsersByName(name);
+
+        // Converte a lista em JSON
+        String json = JsonUtils.toJson(users);
+
+        // Retorna a resposta com status 200
+        return ResponseEntity.ok(json);
+    }
 
     //SAVE USER NEW MODEL
     @PostRouter("/save")

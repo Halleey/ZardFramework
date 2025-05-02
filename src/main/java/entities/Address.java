@@ -18,6 +18,7 @@ public class Address implements Serializable {
     @Column
     private String city;
 
+
     public String getStreet() {
         return street;
     }

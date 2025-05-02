@@ -3,17 +3,19 @@ package entities;
 import configurations.dbas.Column;
 import configurations.dbas.Entity;
 import configurations.dbas.Id;
+import configurations.dbas.ManyToOne;
 
 @Entity
 public class Product {
 
     @Id
-    Long id;
+    private Long id;
     @Column
-    String nome;
+    private String nome;
     @Column
-    double price;
-
+    private double price;
+    @ManyToOne
+    private Pedido ordersPedido;
     public String getNome() {
         return nome;
     }

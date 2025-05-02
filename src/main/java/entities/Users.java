@@ -8,16 +8,16 @@ import configurations.dbas.OneToOne;
 @Entity()
 public class Users {
     @Id
-    long id;
+    private  long id;
     @Column
-    String name;
+    private String name;
     @Column
-    String email;
+    private String email;
     @Column
-    String cpf;
+    private String cpf;
     //fix this, generate table with notation name
     @OneToOne(referencedColumnName = "address_id")
-    Address address;
+    private Address address;
 
     public Address getAddress() {
         return address;

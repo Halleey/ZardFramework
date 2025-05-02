@@ -55,4 +55,9 @@ public class UserService {
             return false;
         }
     }
+    public List<Users> getUsersByName(String name) {
+        return repository.findUsersByName(name);
+    }
+
+
 }

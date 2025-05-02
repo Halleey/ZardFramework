@@ -47,10 +47,11 @@ public class RepositoryInvocationHandler implements InvocationHandler {
 
                 // Executa a consulta e processa os resultados
                 ResultSet rs = stmt.executeQuery();
+                System.out.println(rs + "EXIBINDO O RS--------");
                 List<Object> results = new ArrayList<>();
                 Class<?> entityClass = genericRepository.getEntityClass(); // Classe da entidade
 
-                System.out.println("Processando os resultados da consulta..."); // Debug: indicando que os resultados estão sendo processados
+                System.out.println("Processando os resultados da consulta... vai  trabalhar com a entidade "  + entityClass.getSimpleName()); // Debug: indicando que os resultados estão sendo processados
 
                 // Mapeia os resultados para objetos da entidade
                 while (rs.next()) {
@@ -64,7 +65,9 @@ public class RepositoryInvocationHandler implements InvocationHandler {
                         // Verifica se o campo é uma associação com outra entidade
                         if (field.isAnnotationPresent(OneToOne.class)) {
                             // Supondo convenção: nome do campo + "_id"
+                            System.out.println(field.getName() + "  Declaração na entidade");
                             String foreignKeyColumn = field.getName() + "_id";
+                            System.out.println(foreignKeyColumn + "  referencia no banco");
                             Object foreignKeyValue = rs.getObject(foreignKeyColumn);
                             System.out.println("Atribuindo valor ao campo relacional '" + field.getName() + "': " + foreignKeyValue); // Debug
 

@@ -1,13 +1,11 @@
 package configurations.orm;
 
 
-import configurations.dbas.Column;
-import configurations.dbas.Entity;
-import configurations.dbas.Id;
-import configurations.dbas.OneToOne;
+import configurations.dbas.*;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -40,7 +38,7 @@ public class EntityManager {
 
             // Para cada campo da entidade, verifica se existe uma dependência (chave estrangeira)
             for (Field field : entityClass.getDeclaredFields()) {
-                if (field.isAnnotationPresent(OneToOne.class)) {
+                if (field.isAnnotationPresent(OneToOne.class)  || field.isAnnotationPresent(ManyToOne.class)) {
                     // Adiciona a tabela referenciada como dependência
                     String referencedTable = field.getType().getSimpleName().toLowerCase();
                     td.addDependency(referencedTable);
@@ -78,13 +76,30 @@ public class EntityManager {
         List<String> foreignKeys = new ArrayList<>();
 
         for (Field field : entityClass.getDeclaredFields()) {
-            if (field.isAnnotationPresent(OneToOne.class)) {
+            // Ignora @OneToMany: a FK está do outro lado da relação
+            if (field.isAnnotationPresent(OneToMany.class)) {
+                continue;
+            }
+
+            // Trata @OneToOne e @ManyToOne
+            if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
+                Class<?> refType;
+
+                // Se for uma coleção, extrai o tipo genérico (precaução futura)
+                if (Collection.class.isAssignableFrom(field.getType())) {
+                    ParameterizedType listType = (ParameterizedType) field.getGenericType();
+                    refType = (Class<?>) listType.getActualTypeArguments()[0];
+                } else {
+                    refType = field.getType();
+                }
+
                 String fkColumn = field.getName() + "_id";
                 columnDefs.add(fkColumn + " BIGINT");
 
-                String refTable = field.getType().getSimpleName().toLowerCase();
+                String refTable = refType.getSimpleName().toLowerCase();
                 foreignKeys.add("FOREIGN KEY (" + fkColumn + ") REFERENCES " + refTable + "(id)");
             } else {
+                // Coluna normal
                 columnDefs.add(buildColumnDefinition(field));
             }
         }
@@ -97,6 +112,7 @@ public class EntityManager {
         System.out.println("SQL gerado para a tabela '" + tableName + "':\n" + sql);
         executeSQL(sql);
     }
+
 
     private static String buildColumnDefinition(Field field) {
         String columnName = field.getName();
