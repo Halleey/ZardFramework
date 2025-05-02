@@ -22,4 +22,5 @@ public class JsonUtils {
     public static String toJson(Object obj) {
         return gson.toJson(obj);
     }
+
 }

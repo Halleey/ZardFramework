@@ -13,7 +13,7 @@ import configurations.routes.PostRouter;
 import project.services.UserService;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
+import java.util.Optional;
 
 @RequestController("/user")
 public class ControllerTeste {
@@ -70,6 +70,28 @@ public class ControllerTeste {
             res.send("Usuário não encontrado!");
         }
     }
+
+
+    @GetRouter("/find")
+    public ResponseEntity<String> findId(Request request) {
+        System.out.println("DEBUG: URL recebida: " + request.getPath());
+        String idStr = request.extractPathParam("/user/find");
+        System.out.println("DEBUG: ID extraído: " + idStr);
+
+        Long  address_id = Long.valueOf(idStr);
+        System.out.println("DEBUG: ID convertido para Long: " + address_id);
+
+        List<Users> users = service.getUserById(address_id);
+        System.out.println("DEBUG: Resultado do service: " + users);
+
+        String json = JsonUtils.toJson(users);
+        System.out.println("DEBUG: JSON gerado: " + json);
+
+        System.out.println("DEBUG: Retornando ResponseEntity com JSON");
+        return ResponseEntity.ok(json);
+    }
+
+
 
     //SAVE USER NEW MODEL
     @PostRouter("/save")

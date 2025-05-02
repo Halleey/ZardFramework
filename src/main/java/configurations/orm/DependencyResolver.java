@@ -1,6 +1,7 @@
 package configurations.orm;
 
 import java.util.*;
+
 public class DependencyResolver {
 
     // Resolve a ordem de criação das tabelas com base nas dependências

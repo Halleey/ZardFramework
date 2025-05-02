@@ -42,6 +42,10 @@ public class UserService {
         return repository.findById(id);
     }
 
+    public List<Users> getUserById(Long address_id){
+        return repository.findUsersByAddressId(address_id);
+    }
+
     public boolean deleteUser(Long id) {
         Optional<Users> user = repository.findById(id);
         if (user.isPresent()) {

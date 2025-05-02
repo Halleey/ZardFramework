@@ -128,6 +128,7 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
                     Object value = rs.getObject(field.getName());
                     field.set(entity, value);
                 }
+
                 results.add(entity);
             }
 
