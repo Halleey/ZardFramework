@@ -6,6 +6,7 @@ import org.reflections.Reflections;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -15,9 +16,7 @@ import java.util.*;
 public class EntityManager {
 
     public static void generateSchema(String basePackage) {
-        // Busca todas as classes anotadas com @Entity no pacote informado
         List<Class<?>> entities = getEntityClasses(basePackage);
-
         // Mapeia nome da tabela -> Classe Java (para uso posterior)
         Map<String, Class<?>> tableClassMap = new HashMap<>();
 
@@ -26,8 +25,8 @@ public class EntityManager {
 
         // Constrói o grafo de dependência baseado nas anotações de relacionamentos
         for (Class<?> entityClass : entities) {
+            validateEntityStructure(entityClass);
             Entity entity = entityClass.getAnnotation(Entity.class);
-            // Pega o nome da tabela (ou nome da classe em minúsculo)
             String tableName = entity.value().isEmpty() ? entityClass.getSimpleName().toLowerCase() : entity.value();
 
             // Armazena o mapeamento da tabela com sua classe correspondente
@@ -98,13 +97,10 @@ public class EntityManager {
                     refType = field.getType();
                 }
 
-                // Nome da coluna de FK (ex: "usuario_id")
                 String fkColumn = field.getName() + "_id";
 
-                // Define a coluna da FK como BIGINT
                 columnDefs.add(fkColumn + " BIGINT");
 
-                // Nome da tabela referenciada (em minúsculo)
                 String refTable = refType.getSimpleName().toLowerCase();
 
                 // Verifica se a classe referenciada possui @OneToMany apontando para essa entidade, com cascade ativado
@@ -203,5 +199,41 @@ public class EntityManager {
             e.printStackTrace();
         }
     }
+
+
+    private static void validateEntityStructure(Class<?> entityClass) {
+        for (Field field : entityClass.getDeclaredFields()) {
+
+            if (field.isAnnotationPresent(OneToMany.class)) {
+                Type[] typeArgs = getTypes(entityClass, field);
+                if (typeArgs.length != 1 || !(typeArgs[0] instanceof Class)) {
+                    throw new IllegalStateException("Tipo genérico de '" + field.getName() + "' não pôde ser inferido corretamente.");
+                }
+            }
+
+            if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
+                if (field.getType().isPrimitive()) {
+                    throw new IllegalStateException("Relacionamento em '" + field.getName() + "' não pode usar tipo primitivo.");
+                }
+            }
+        }
+    }
+
+    private static Type[] getTypes(Class<?> entityClass, Field field) {
+        if (!Collection.class.isAssignableFrom(field.getType())) {
+            throw new IllegalStateException("Campo '" + field.getName() + "' da entidade '" + entityClass.getSimpleName()
+                    + "' está anotado com @OneToMany mas não é uma Collection.");
+        }
+
+        // Verifica se o tipo genérico foi definido corretamente
+        if (!(field.getGenericType() instanceof ParameterizedType pt)) {
+            throw new IllegalStateException("Campo '" + field.getName() + "' da entidade '" + entityClass.getSimpleName()
+                    + "' precisa definir o tipo genérico corretamente (ex: List<Algo>).");
+        }
+
+        return pt.getActualTypeArguments();
+    }
+
+
 }
 
