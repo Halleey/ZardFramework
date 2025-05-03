@@ -24,7 +24,7 @@ public class EntityManager {
         // Grafo de dependências entre tabelas (usado para saber a ordem de criação)
         Map<String, TableDependency> dependencyGraph = new HashMap<>();
 
-        // Constrói o grafo de dependência baseado nas anotações @OneToOne
+        // Constrói o grafo de dependência baseado nas anotações de relacionamentos
         for (Class<?> entityClass : entities) {
             Entity entity = entityClass.getAnnotation(Entity.class);
             // Pega o nome da tabela (ou nome da classe em minúsculo)
@@ -70,47 +70,94 @@ public class EntityManager {
 
     private static void generateTable(Class<?> entityClass) {
         Entity entity = entityClass.getAnnotation(Entity.class);
-        String tableName = entity.value().isEmpty() ? entityClass.getSimpleName().toLowerCase() : entity.value();
+        String tableName = entity.value().isEmpty()
+                ? entityClass.getSimpleName().toLowerCase()
+                : entity.value();
 
         List<String> columnDefs = new ArrayList<>();
         List<String> foreignKeys = new ArrayList<>();
 
+        // Percorre todos os campos da classe para processar colunas e relacionamentos
         for (Field field : entityClass.getDeclaredFields()) {
-            // Ignora @OneToMany: a FK está do outro lado da relação
+
+            // Ignora campos anotados com @OneToMany, pois a FK está na outra ponta da relação
             if (field.isAnnotationPresent(OneToMany.class)) {
                 continue;
             }
 
-            // Trata @OneToOne e @ManyToOne
+            // Se for @OneToOne ou @ManyToOne, gera uma chave estrangeira
             if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
                 Class<?> refType;
 
-                // Se for uma coleção, extrai o tipo genérico (precaução futura)
+                // Precaução futura: se o campo for uma Collection (ex: List<Algo>), extrai o tipo genérico
                 if (Collection.class.isAssignableFrom(field.getType())) {
                     ParameterizedType listType = (ParameterizedType) field.getGenericType();
                     refType = (Class<?>) listType.getActualTypeArguments()[0];
                 } else {
+                    // Tipo direto (entidade referenciada)
                     refType = field.getType();
                 }
 
+                // Nome da coluna de FK (ex: "usuario_id")
                 String fkColumn = field.getName() + "_id";
+
+                // Define a coluna da FK como BIGINT
                 columnDefs.add(fkColumn + " BIGINT");
 
+                // Nome da tabela referenciada (em minúsculo)
                 String refTable = refType.getSimpleName().toLowerCase();
-                foreignKeys.add("FOREIGN KEY (" + fkColumn + ") REFERENCES " + refTable + "(id)");
+
+                // Verifica se a classe referenciada possui @OneToMany apontando para essa entidade, com cascade ativado
+                boolean cascade = hasCascade(refType, entityClass);
+
+                // Cria a cláusula da chave estrangeira
+                String fk = "FOREIGN KEY (" + fkColumn + ") REFERENCES " + refTable + "(id)";
+                if (cascade) {
+                    // Adiciona a opção ON DELETE CASCADE se o relacionamento permitir
+                    fk += " ON DELETE CASCADE";
+                }
+
+                // Adiciona a FK à lista
+                foreignKeys.add(fk);
             } else {
-                // Coluna normal
+                // Campo comum (sem relação), define a coluna normalmente
                 columnDefs.add(buildColumnDefinition(field));
             }
         }
 
+        // Adiciona as FKs no final da definição de colunas
         columnDefs.addAll(foreignKeys);
 
+        // Monta a instrução SQL final
         String sql = "CREATE TABLE IF NOT EXISTS " + tableName + " (\n  " +
                 String.join(",\n  ", columnDefs) + "\n);";
 
+        // Exibe o SQL no console
         System.out.println("SQL gerado para a tabela '" + tableName + "':\n" + sql);
+
+        // Executa o SQL no banco
         executeSQL(sql);
+    }
+
+
+    private static boolean hasCascade(Class<?> entityClazz, Class<?> refType) {
+        for (Field field : entityClazz.getDeclaredFields()) {
+            if (field.isAnnotationPresent(OneToMany.class)) {
+                //Usado para lidar com List<>  Maps  e afins, assim podemos extrair o parametro <?>
+                ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
+                // Obtém o tipo da coleção (ex: List<Aluno> → Aluno)
+                Class<?> target = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+
+                // Compara o tipo com o tipo de referência esperado
+                if (target.equals(refType)) {
+                    // Verifica se o cascade está ativado
+                    OneToMany otm = field.getAnnotation(OneToMany.class);
+                    return otm.cascade(); // true = aplicar cascade
+                }
+            }
+        }
+        // Não encontrou correspondência ou cascade desativado
+        return false;
     }
 
 

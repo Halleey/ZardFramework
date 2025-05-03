@@ -15,7 +15,6 @@ public class Users {
     private String email;
     @Column
     private String cpf;
-    //fix this, generate table with notation name
     @OneToOne(referencedColumnName = "address_id")
     private Address address;
 

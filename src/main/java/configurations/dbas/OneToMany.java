@@ -8,5 +8,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.METHOD,ElementType.FIELD})
 public @interface OneToMany {
-
+    boolean cascade() default false;
 }

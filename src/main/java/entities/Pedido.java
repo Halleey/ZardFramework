@@ -6,11 +6,10 @@ import java.util.List;
 
 @Entity
 public class Pedido {
-
     @Id
     Long id;
     @Column
     private String name;
-    @OneToMany
+    @OneToMany(cascade = true)
     List<Product> products;
 }
