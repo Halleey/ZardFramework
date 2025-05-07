@@ -5,6 +5,7 @@ import project.dtos.UserRequestDto;
 import entities.Address;
 import entities.Users;
 
+import project.dtos.UserResponseDTO;
 import project.repositories.AddressRepository;
 import project.repositories.UserRepository;
 
@@ -55,7 +56,7 @@ public class UserService {
             return false;
         }
     }
-    public List<Users> getUsersByName(String name) {
+    public List<UserResponseDTO> getUsersByName(String name) {
         return repository.findUsersByName(name);
     }
 

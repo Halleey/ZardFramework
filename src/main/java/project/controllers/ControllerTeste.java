@@ -10,6 +10,7 @@ import configurations.routes.GetRouter;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.routes.PostRouter;
+import project.dtos.UserResponseDTO;
 import project.services.UserService;
 import java.io.IOException;
 import java.util.List;
@@ -97,7 +98,7 @@ public class ControllerTeste {
             return ResponseEntity.status(400, "Parâmetro 'name' é obrigatório");
         }
 
-        List<Users> users = service.getUsersByName(name);
+        List<UserResponseDTO> users = service.getUsersByName(name);
 
         // Converte a lista em JSON
         String json = JsonUtils.toJson(users);
