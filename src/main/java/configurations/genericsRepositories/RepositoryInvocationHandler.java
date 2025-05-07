@@ -1,5 +1,6 @@
 package configurations.genericsRepositories;
 
+
 import configurations.dbas.Id;
 import configurations.dbas.OneToOne;
 import configurations.dbas.Querys;
@@ -13,12 +14,10 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 public class RepositoryInvocationHandler implements InvocationHandler {
-    private final GenericRepositoryImpl<?, ?> genericRepository; // Instância do repositório genérico
+    private final GenericRepositoryImpl<?, ?> genericRepository;
 
     public RepositoryInvocationHandler(Class<?> entityClass) {
-        // Cria uma instância do repositório genérico com a classe da entidade
         this.genericRepository = new GenericRepositoryImpl<>(entityClass);
     }
 
@@ -32,7 +31,6 @@ public class RepositoryInvocationHandler implements InvocationHandler {
             try (Connection conn = ConnectionPool.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(sql)) {
 
-                // Define os parâmetros da query
                 if (args != null) {
                     for (int i = 0; i < args.length; i++) {
                         stmt.setObject(i + 1, args[i]);
@@ -43,41 +41,68 @@ public class RepositoryInvocationHandler implements InvocationHandler {
                 ResultSet rs = stmt.executeQuery();
                 List<Object> results = new ArrayList<>();
 
-                // Aqui detectamos o tipo de retorno do método
-                Class<?> returnType = getReturnTypeClass(method);
-
-                System.out.println("Tipo de retorno esperado: " + returnType.getSimpleName());
+                Class<?> resultClass = getReturnTypeClass(method);
+                System.out.println("Tipo de retorno esperado: " + resultClass.getSimpleName());
 
                 while (rs.next()) {
-                    Object resultObject = returnType.getDeclaredConstructor().newInstance();
+                    Object instance = resultClass.getDeclaredConstructor().newInstance();
 
-                    for (Field field : returnType.getDeclaredFields()) {
+                    for (Field field : resultClass.getDeclaredFields()) {
                         field.setAccessible(true);
-                        String columnName = field.getName(); // Nome padrão
+                        String columnName = field.getName();
 
                         try {
-                            Object value = rs.getObject(columnName);
-                            System.out.println("Atribuindo campo '" + columnName + "' com valor: " + value);
-                            field.set(resultObject, value);
-                        } catch (SQLException e) {
+                            if (field.isAnnotationPresent(OneToOne.class)) {
+                                String foreignKeyColumn = columnName + "_id";
+                                Object foreignKeyValue = rs.getObject(foreignKeyColumn);
+
+                                System.out.println("Campo relacional detectado: " + columnName + " -> FK: " + foreignKeyColumn);
+
+                                if (foreignKeyValue != null) {
+                                    Class<?> relatedClass = field.getType();
+                                    Object relatedInstance = relatedClass.getDeclaredConstructor().newInstance();
+
+                                    Field idField = Arrays.stream(relatedClass.getDeclaredFields())
+                                            .filter(f -> f.isAnnotationPresent(Id.class))
+                                            .findFirst()
+                                            .orElseThrow(() -> new RuntimeException("Campo @Id não encontrado em " + relatedClass.getSimpleName()));
+
+                                    idField.setAccessible(true);
+                                    idField.set(relatedInstance, foreignKeyValue);
+                                    field.set(instance, relatedInstance);
+                                    System.out.println("Relacionamento " + columnName + " preenchido com ID: " + foreignKeyValue);
+                                }
+
+                            } else {
+                                Object value = rs.getObject(columnName);
+                                field.set(instance, value);
+                                System.out.println("Campo '" + columnName + "' preenchido com: " + value);
+                            }
+
+                        } catch (SQLException sqlEx) {
                             System.out.println("Coluna '" + columnName + "' não encontrada no ResultSet. Ignorando.");
+                        } catch (Exception ex) {
+                            System.err.println("Erro ao atribuir valor ao campo '" + columnName + "': " + ex.getMessage());
+                            throw ex;
                         }
                     }
 
-                    results.add(resultObject);
+                    results.add(instance);
                 }
 
+                System.out.println("Consulta executada com sucesso. Total de entidades mapeadas: " + results.size());
                 return results;
+
             } catch (SQLException e) {
                 System.err.println("Erro SQL: " + e.getMessage());
                 throw e;
             } catch (Exception e) {
-                System.err.println("Erro ao instanciar classe de retorno: " + e.getMessage());
+                System.err.println("Erro ao processar a entidade de retorno: " + e.getMessage());
                 throw e;
             }
         }
 
-        // Métodos normais delegados ao repositório genérico
+        // Chamada padrão: save, findAll, etc.
         return method.invoke(genericRepository, args);
     }
 
@@ -88,12 +113,11 @@ public class RepositoryInvocationHandler implements InvocationHandler {
             ParameterizedType pt = (ParameterizedType) genericReturnType;
             Type[] actualTypes = pt.getActualTypeArguments();
             if (actualTypes.length == 1 && actualTypes[0] instanceof Class) {
-                return (Class<?>) actualTypes[0]; // Ex: List<MeuDTO>
+                return (Class<?>) actualTypes[0]; // Ex: List<EntidadeOuDTO>
             }
         }
 
-        // Se não for parametrizado, assume a classe da entidade
+        // Default: assume a classe da entidade
         return genericRepository.getEntityClass();
     }
-
 }
