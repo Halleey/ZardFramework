@@ -34,7 +34,7 @@ public class UserService {
     }
 
     public List<Users> getAll() {
-      return repository.findAllOnlyReferences();
+      return repository.findAll();
 
     }
 

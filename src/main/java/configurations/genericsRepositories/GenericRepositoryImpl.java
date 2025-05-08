@@ -9,10 +9,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
@@ -22,6 +20,9 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
     private final Field idField;
     private final List<Field> columnFields;
     private final List<Field> relationFields;
+    private static final Map<Class<?>, Field> ID_FIELD_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, List<Field>> COLUMN_FIELDS_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, List<Field>> RELATION_FIELDS_CACHE = new ConcurrentHashMap<>();
 
     public GenericRepositoryImpl(Class<T> entityClass) {
         this.entityClass = entityClass;
@@ -30,20 +31,27 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
         /*
          Percorre todos os campos da entidade, realiza o filtro e retorna somente o que for necessario em formato de lista
          */
-        this.idField = Arrays.stream(entityClass.getDeclaredFields())
-                .filter(f -> f.isAnnotationPresent(Id.class))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Entidade " + entityClass.getSimpleName() + " não tem @Id"));
+        this.idField = ID_FIELD_CACHE.computeIfAbsent(entityClass, cls ->
+                Arrays.stream(cls.getDeclaredFields())
+                        .filter(f -> f.isAnnotationPresent(Id.class))
+                        .peek(f -> f.setAccessible(true))
+                        .findFirst()
+                        .orElseThrow(() -> new RuntimeException("Entidade " + cls.getSimpleName() + " não tem @Id"))
+        );
 
-        // Campos simples (colunas + id)
-        this.columnFields = Arrays.stream(entityClass.getDeclaredFields())
-                .filter(f -> f.isAnnotationPresent(Column.class) || f.isAnnotationPresent(Id.class))
-                .collect(Collectors.toList());
+        this.columnFields = COLUMN_FIELDS_CACHE.computeIfAbsent(entityClass, cls ->
+                Arrays.stream(cls.getDeclaredFields())
+                        .filter(f -> f.isAnnotationPresent(Column.class) || f.isAnnotationPresent(Id.class))
+                        .peek(f -> f.setAccessible(true))
+                        .collect(Collectors.toList())
+        );
 
-        // Campos de relacionamento
-        this.relationFields = Arrays.stream(entityClass.getDeclaredFields())
-                .filter(f -> f.isAnnotationPresent(OneToOne.class))
-                .collect(Collectors.toList());
+        this.relationFields = RELATION_FIELDS_CACHE.computeIfAbsent(entityClass, cls ->
+                Arrays.stream(cls.getDeclaredFields())
+                        .filter(f -> f.isAnnotationPresent(OneToOne.class))
+                        .peek(f -> f.setAccessible(true))
+                        .collect(Collectors.toList())
+        );
 
         // Permitir acesso a campos privados
         this.idField.setAccessible(true);
@@ -210,9 +218,6 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
 
         return results;
     }
-
-
-
 
     @Override
     public Optional<T> findById(ID id) {
