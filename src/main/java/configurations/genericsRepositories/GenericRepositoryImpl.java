@@ -123,9 +123,30 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
 
             while (rs.next()) {
                 T entity = entityClass.getDeclaredConstructor().newInstance();
+
+                // Campos simples (colunas + id)
                 for (Field field : columnFields) {
                     Object value = rs.getObject(field.getName());
                     field.set(entity, value);
+                }
+
+                // Campos de relacionamento (fk)
+                for (Field fieldRelations : relationFields) {
+                    String fkColumn = fieldRelations.getName() + "_id";
+                    Object fkValue = rs.getObject(fkColumn);
+
+                    if (fkValue != null) {
+                        Class<?> relatedClass = fieldRelations.getType();
+
+                        // Obtém o DAO da entidade relacionada
+                        GenericRepository<?, Object> relatedDao = DaoFactory.getDao(relatedClass);
+
+                        // Busca a entidade relacionada pelo ID da FK
+                        Object relatedEntity = relatedDao.findById(fkValue)
+                                .orElse(null);
+
+                        fieldRelations.set(entity, relatedEntity);
+                    }
                 }
 
                 results.add(entity);
