@@ -160,6 +160,61 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
     }
 
     @Override
+    public List<T> findAllOnlyReferences() {
+        List<T> results = new ArrayList<>();
+        String sql = "SELECT * FROM " + tableName;
+
+        try (Connection conn = ConnectionPool.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                T entity = entityClass.getDeclaredConstructor().newInstance();
+
+                // Preenche campos simples (colunas + id)
+                for (Field field : columnFields) {
+                    Object value = rs.getObject(field.getName());
+                    field.set(entity, value);
+                }
+
+                // Preenche somente o ID das relações, não a entidade completa
+                for (Field relationField : relationFields) {
+                    String fkColumn = relationField.getName() + "_id";
+                    Object fkValue = rs.getObject(fkColumn);
+
+                    if (fkValue != null) {
+                        // Cria uma instância "vazia" da classe relacionada, com apenas o ID setado
+                        Object relatedInstance = relationField.getType().getDeclaredConstructor().newInstance();
+
+                        // Procura o campo que é @Id na classe relacionada
+                        Field idField = Arrays.stream(relationField.getType().getDeclaredFields())
+                                .filter(f -> f.isAnnotationPresent(Id.class)) // ou use outra forma de identificar o ID
+                                .findFirst()
+                                .orElseThrow(() -> new RuntimeException("ID field not found in " + relationField.getType()));
+
+                        idField.setAccessible(true);
+                        idField.set(relatedInstance, fkValue);
+
+                        // Define no campo da entidade principal
+                        relationField.setAccessible(true);
+                        relationField.set(entity, relatedInstance);
+                    }
+                }
+
+                results.add(entity);
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+        return results;
+    }
+
+
+
+
+    @Override
     public Optional<T> findById(ID id) {
         String sql = "SELECT * FROM " + tableName + " WHERE " + idField.getName() + " = ?";
 
