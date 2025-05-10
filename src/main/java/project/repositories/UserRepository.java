@@ -2,12 +2,13 @@ package project.repositories;
 
 import configurations.dbas.Querys;
 import configurations.genericsRepositories.GenericRepository;
+import configurations.instancias.Repository;
 import entities.Users;
 import project.dtos.UserResponseDTO;
 
 import java.util.List;
 
-
+@Repository
 public interface UserRepository extends GenericRepository<Users, Long> {
 
 

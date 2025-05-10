@@ -1,5 +1,6 @@
 package project.services;
 
+import configurations.instancias.Service;
 import project.dtos.UserRequestDto;
 
 import entities.Address;
@@ -11,7 +12,7 @@ import project.repositories.UserRepository;
 
 import java.util.List;
 import java.util.Optional;
-
+@Service
 public class UserService {
 
     private final UserRepository repository;

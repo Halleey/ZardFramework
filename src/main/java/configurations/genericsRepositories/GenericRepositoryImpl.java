@@ -53,10 +53,10 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
                         .collect(Collectors.toList())
         );
 
-        // Permitir acesso a campos privados
-        this.idField.setAccessible(true);
-        this.columnFields.forEach(f -> f.setAccessible(true));
-        this.relationFields.forEach(f -> f.setAccessible(true));
+//        // Permitir acesso a campos privados
+//        this.idField.setAccessible(true);
+//        this.columnFields.forEach(f -> f.setAccessible(true));
+//        this.relationFields.forEach(f -> f.setAccessible(true));
     }
 
     @Override

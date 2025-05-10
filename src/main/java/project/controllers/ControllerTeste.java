@@ -1,5 +1,6 @@
 package project.controllers;
 
+import configurations.instancias.RestController;
 import configurations.responses.ResponseEntity;
 import configurations.routes.RequestController;
 import entities.JsonUtils;
@@ -16,6 +17,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
+@RestController
 @RequestController("/user")
 public class ControllerTeste {
 

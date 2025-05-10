@@ -1,5 +1,6 @@
 package project.controllers;
 
+import configurations.instancias.RestController;
 import configurations.routes.GetRouter;
 import configurations.routes.PatchRouter;
 import configurations.routes.RequestController;
@@ -13,7 +14,7 @@ import project.services.ProdutoService;
 
 import java.io.IOException;
 import java.util.List;
-
+@RestController
 @RequestController("/products")
 public class ProdutoController {
 
