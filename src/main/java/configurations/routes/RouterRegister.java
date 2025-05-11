@@ -5,8 +5,10 @@ import configurations.handlers.RequestHandler;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.responses.ResponseEntity;
+import entities.JsonUtils;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.util.Map;
 
 public class RouterRegister {
@@ -70,24 +72,25 @@ public class RouterRegister {
     private static RequestHandler createHandler(Object controller, Method method) {
         return (req, res) -> {
             try {
-                Class<?>[] parameterTypes = method.getParameterTypes();
-                Object result;
+                Parameter[] parameters = method.getParameters();
+                Object[] args = new Object[parameters.length];
 
-                if (parameterTypes.length == 0) {
-                    result = method.invoke(controller);
-                } else if (parameterTypes.length == 1 && parameterTypes[0] == Request.class) {
-                    // Suporta métodos com apenas o Request
-                    result = method.invoke(controller, req);
-                } else if (parameterTypes.length == 2
-                        && parameterTypes[0] == Request.class
-                        && parameterTypes[1] == Response.class) {
-                    method.invoke(controller, req, res);
-                    return;
-                } else {
-                    throw new IllegalStateException("Assinatura do método inválida: " + method.getName());
+                for (int i = 0; i < parameters.length; i++) {
+                    Class<?> type = parameters[i].getType();
+
+                    if (type == Request.class) {
+                        args[i] = req;
+                    } else if (type == Response.class) {
+                        args[i] = res;
+                    } else {
+                        // Assume que o corpo é JSON e tenta converter para o tipo do parâmetro
+                        String body = req.getBody();
+                        args[i] = JsonUtils.fromJson(body, type); // Usa Jackson ou Gson
+                    }
                 }
 
-                // Se o método retornar algo, envia como resposta
+                Object result = method.invoke(controller, args);
+
                 if (result != null) {
                     if (result instanceof ResponseEntity<?> entity) {
                         res.setStatus(entity.getStatusCode());
@@ -100,13 +103,15 @@ public class RouterRegister {
                         res.send(result.toString());
                     }
                 } else {
-                    res.send(""); // método void ou retorno nulo
+                    res.send("");
                 }
 
             } catch (Exception e) {
-                res.send(500, "Erro interno no servidor");
+                e.printStackTrace(); // Para debug
+                res.send(500, "Erro interno no servidor: " + e.getMessage());
             }
         };
     }
+
 
 }

@@ -15,8 +15,6 @@ import project.dtos.UserResponseDTO;
 import project.services.UserService;
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
-
 @RestController
 @RequestController("/user")
 public class ControllerTeste {
@@ -110,16 +108,14 @@ public class ControllerTeste {
     }
 
     //SAVE USER NEW MODEL
+    //ele recebe a DTO direto via reflexão
     @PostRouter("/save")
-    public ResponseEntity<String> saveUser(Request req) throws IOException {
-        String body = req.getBody(); // JSON vindo no body
-
-        UserRequestDto user = JsonUtils.fromJson(body, UserRequestDto.class); // transforma JSON -> Users
-
-        service.createUser(user); // chama o service certinho
+    public ResponseEntity<String> saveUser(UserRequestDto requestDto) {
+        service.createUser(requestDto); // já recebeu o DTO pronto
 
         return ResponseEntity.status(201, "Salvando no novo modelo");
     }
+
 
     //SAVE USER OLD MODEL
     @PostRouter("/salvar")

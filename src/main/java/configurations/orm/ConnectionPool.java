@@ -35,9 +35,9 @@ public class ConnectionPool {
 
     // Método auxiliar para criar uma nova conexão com o banco
     private static Connection createConnection() throws SQLException {
-        System.out.println("Criando nova conexão com o banco de dados...");
+//System.out.println("Criando nova conexão com o banco de dados...");
         Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
-        System.out.println("Conexão criada com sucesso!");
+   //    System.out.println("Conexão criada com sucesso!");
         return connection;
     }
 
@@ -55,7 +55,7 @@ public class ConnectionPool {
 
         // Verifica se a conexão foi estabelecida corretamente
         if (conn != null) {
-            System.out.println("Conexão com o banco de dados estabelecida com sucesso!");
+         //   System.out.println("Conexão com o banco de dados estabelecida com sucesso!");
         } else {
             System.err.println("Falha ao estabelecer a conexão com o banco de dados.");
         }

@@ -11,10 +11,10 @@ public class ClassScanner {
         Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith((Class<? extends Annotation>) annotationClass);
 
         // debugando para ver se o reflection ta acessando o pacote corretamente
-        System.out.println(" Classes anotadas com @" + annotationClass.getSimpleName() + " em '" + basePackage + "':");
-        for (Class<?> clazz : annotatedClasses) {
-            System.out.println(" ->  " + clazz.getName());
-        }
+      //  System.out.println(" Classes anotadas com @" + annotationClass.getSimpleName() + " em '" + basePackage + "':");
+//        for (Class<?> clazz : annotatedClasses) {
+//            System.out.println(" ->  " + clazz.getName());
+//        }
 
         return annotatedClasses;
     }

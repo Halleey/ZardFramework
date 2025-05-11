@@ -37,7 +37,7 @@ public class ZardContext {
             instantiateWithDependencies(clazz);
         }
 
-        // 🔹 3. Instancia todos os controladores anotados com @RestController
+        // Instancia todos os controladores anotados com @RestController
         for (Class<?> clazz : ClassScanner.getAnnotatedClasses(basePackage, RestController.class)) {
             // Cria instância do controller e injeta as dependências necessárias
             instantiateWithDependencies(clazz);

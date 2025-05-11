@@ -61,5 +61,9 @@ public class UserService {
         return repository.findUsersByName(name);
     }
 
+    @Override
+    public String toString() {
+        return "UserService [repository=" + repository + ", addressRepository=" + addressRepository + "]";
+    }
 
 }
