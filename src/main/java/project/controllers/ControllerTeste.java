@@ -2,15 +2,12 @@ package project.controllers;
 
 import configurations.instancias.RestController;
 import configurations.responses.ResponseEntity;
-import configurations.routes.RequestController;
+import configurations.routes.*;
 import entities.JsonUtils;
 import project.dtos.UserRequestDto;
 import entities.Users;
-import configurations.routes.DeleteRouter;
-import configurations.routes.GetRouter;
 import configurations.requests.Request;
 import configurations.requests.Response;
-import configurations.routes.PostRouter;
 import project.dtos.UserResponseDTO;
 import project.services.UserService;
 import java.io.IOException;
@@ -89,23 +86,40 @@ public class ControllerTeste {
         return ResponseEntity.ok(json);
     }
 
-    @GetRouter("/equals")
-    public ResponseEntity<String> getEqualsName(Request request) {
-        // Extrai o parâmetro "name" da query string
-        String name = request.getQueryParam("name");
 
+    //Nova versão
+    @GetRouter("/equals")
+    public ResponseEntity<String> getEqualsName(@QueryParam("name") String name) {
         if (name == null || name.isBlank()) {
             return ResponseEntity.status(400, "Parâmetro 'name' é obrigatório");
         }
 
         List<UserResponseDTO> users = service.getUsersByName(name);
 
-        // Converte a lista em JSON
         String json = JsonUtils.toJson(users);
 
-        // Retorna a resposta com status 200
         return ResponseEntity.ok(json);
     }
+
+
+//    @GetRouter("/equals")
+//    Metodo antigo e mal feito.
+//    public ResponseEntity<String> getEqualsName(Request request) {
+//        // Extrai o parâmetro "name" da query string
+//        String name = request.getQueryParam("name");
+//
+//        if (name == null || name.isBlank()) {
+//            return ResponseEntity.status(400, "Parâmetro 'name' é obrigatório");
+//        }
+//
+//        List<UserResponseDTO> users = service.getUsersByName(name);
+//
+//        // Converte a lista em JSON
+//        String json = JsonUtils.toJson(users);
+//
+//        // Retorna a resposta com status 200
+//        return ResponseEntity.ok(json);
+//    }
 
     //SAVE USER NEW MODEL
     //ele recebe a DTO direto via reflexão

@@ -69,6 +69,8 @@ public class RouterRegister {
     }
 
 
+
+    //Terminar outra hora suporte dinamico para RequestParam e PathParam
     private static RequestHandler createHandler(Object controller, Method method) {
         return (req, res) -> {
             try {
@@ -76,18 +78,27 @@ public class RouterRegister {
                 Object[] args = new Object[parameters.length];
 
                 for (int i = 0; i < parameters.length; i++) {
-                    Class<?> type = parameters[i].getType();
+                    Parameter parameter = parameters[i];
+                    Class<?> type = parameter.getType();
 
                     if (type == Request.class) {
                         args[i] = req;
                     } else if (type == Response.class) {
                         args[i] = res;
+                    } else if (parameter.isAnnotationPresent(QueryParam.class)) {
+                        String key = parameter.getAnnotation(QueryParam.class).value();
+                        String rawValue = req.getQueryParam(key); // Método que você precisa expor no Request
+
+                        // Conversão simples
+                        Object value = convertValue(rawValue, type);
+                        args[i] = value;
                     } else {
-                        // Assume que o corpo é JSON e tenta converter para o tipo do parâmetro
+                        // Assume corpo JSON
                         String body = req.getBody();
-                        args[i] = JsonUtils.fromJson(body, type); // Usa Jackson ou Gson
+                        args[i] = JsonUtils.fromJson(body, type);
                     }
                 }
+
 
                 Object result = method.invoke(controller, args);
 
@@ -113,5 +124,13 @@ public class RouterRegister {
         };
     }
 
+    private static Object convertValue(String value, Class<?> type) {
+        if (value == null) return null;
+        if (type == String.class) return value;
+        if (type == int.class || type == Integer.class) return Integer.parseInt(value);
+        if (type == long.class || type == Long.class) return Long.parseLong(value);
+        if (type == boolean.class || type == Boolean.class) return Boolean.parseBoolean(value);
+        throw new IllegalArgumentException("Tipo não suportado para query param: " + type);
+    }
 
 }
