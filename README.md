@@ -187,6 +187,7 @@ public class UserService {
 ```java
 
 
+@RestController
 @RequestController("/user")
 public class ControllerTeste {
 
@@ -218,16 +219,12 @@ public class ControllerTeste {
   //Versãoc com ResponseEntity
 
   @GetRouter("/todos")
-  public ResponseEntity<String> pegatodos() {
+  public ResponseEntity<List<Users>> pegatodos() {
     // Chama o serviço para pegar todos os usuários
     List<Users> usersList = service.getAll();
-
-    // Converte a lista de usuários para JSON
-    String jsonResponse = JsonUtils.toJson(usersList);
     // Envia a resposta com a lista de usuários
-    return ResponseEntity.ok(jsonResponse);
+    return ResponseEntity.ok(usersList);
   }
-
 
   @DeleteRouter("/delete")
   public void deleteUser(Request req, Response res) throws IOException {
@@ -243,17 +240,34 @@ public class ControllerTeste {
     }
   }
 
+  @GetRouter("/find")
+  public ResponseEntity<List<Users>> findIdParam(@QueryParam("id") Long id) {
+    List<Users> users = service.getUserById(id);
+    return ResponseEntity.ok(users);
+  }
+
+  //Nova versão
+  //usamos o curinga no response para podermos trabalhar tanto com serialização json
+  // quanto retorno em String personalizado
+  @GetRouter("/equals")
+  public ResponseEntity<?> getEqualsName(@QueryParam("name") String name) {
+    if (name == null || name.isBlank()) {
+      return ResponseEntity.status(400, "erro, parametro obrigatorio faltando");
+    }
+
+    List<UserResponseDTO> users = service.getUsersByName(name);
+    return ResponseEntity.ok(users);
+  }
+
+
   //SAVE USER NEW MODEL
+  //ele recebe a DTO direto via reflexão
   @PostRouter("/save")
-  public ResponseEntity<String> saveUser(Request req) throws IOException {
-    String body = req.getBody(); // JSON vindo no body
-
-    UserRequestDto user = JsonUtils.fromJson(body, UserRequestDto.class); // transforma JSON -> Users
-
-    service.createUser(user); // chama o service certinho
-
+  public ResponseEntity<String> saveUser(UserRequestDto requestDto) {
+    service.createUser(requestDto); // já recebeu o DTO pronto
     return ResponseEntity.status(201, "Salvando no novo modelo");
   }
+
 
   //SAVE USER OLD MODEL
   @PostRouter("/salvar")
@@ -265,11 +279,7 @@ public class ControllerTeste {
     service.createUser(user); // chama o service certinho
     response.send("Salvando da forma velha");
   }
-
-
 }
-
-
 
 ```
 
@@ -279,32 +289,21 @@ public class ControllerTeste {
 
 ```java
 
+    public class ZardFrameworkApplication {
+	    public static void main(String[] args) throws Exception {
+		Server app = new Server(8080);
+		//coloque aqui, o pacote principal onde se encontra suas entidades
+		EntityManager.generateSchema("entities");
+		ZardContext context = new ZardContext();
+		//coloque aqui, o pacote principal do seu projeto
+		context.initialize("project");
 
-public class ZardFrameworkApplication {
-  public static void main(String[] args) throws IOException {
-    Server app = new Server(8080);
-
-    //Escanear o pacote para gerar as entidades.
-    EntityManager.generateSchema("entities");
-
-
-    // 1. Cria o repositório para Users
-    UserRepository userRepository = RepositoryFactory.createRepository(UserRepository.class, Users.class);
-    ProductRepository repository = RepositoryFactory.createRepository(ProductRepository.class, Product.class);
-
-    // 2. Cria o UserService, passando o repositório
-    UserService userService = new UserService(userRepository);
-    ProdutoService produtoService = new ProdutoService(repository);
-
-
-    // 3. Cria o ControllerTeste, passando o UserService
-    ControllerTeste controllerTeste = new ControllerTeste(userService);
-    ProdutoController produtoController = new ProdutoController(produtoService);
-    RouterRegister.registerRoutes(app, produtoController);
-    RouterRegister.registerRoutes(app, controllerTeste);
-
-    app.start();
-  }
+		for (Object controller : context.getControllers()) {
+			RouterRegister.registerRoutes(app, controller);
+		}
+		// De resto, não tem ncessidade alterar.
+		app.start();
+	}
 }
 ```
 

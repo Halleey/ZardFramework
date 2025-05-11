@@ -70,9 +70,6 @@ public class ResponseEntity<T> extends HttpEntity<T> {
         return new ResponseEntity<>(body, Map.of("Content-Type", "text/plain"), status);
     }
 
-    public static <T> ResponseEntity<T> status(int status) {
-        return new ResponseEntity<>(null, status);
-    }
 
 
 

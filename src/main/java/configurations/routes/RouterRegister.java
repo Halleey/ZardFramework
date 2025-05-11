@@ -38,7 +38,7 @@ public class RouterRegister {
                 String path = combinePaths(basePath, patchRoute.value());
                 server.patch(path, createHandler(controller, method));
  }
-        }
+            }
     }
 
     private static String getBasePath(Class<?> controllerClass) {
@@ -68,8 +68,6 @@ public class RouterRegister {
         return basePath + value;
     }
 
-
-
     //Terminar outra hora suporte dinamico para RequestParam e PathParam
     private static RequestHandler createHandler(Object controller, Method method) {
         return (req, res) -> {
@@ -92,14 +90,13 @@ public class RouterRegister {
                         // Conversão simples
                         Object value = convertValue(rawValue, type);
                         args[i] = value;
-                    } else {
+                    }
+                    else {
                         // Assume corpo JSON
                         String body = req.getBody();
                         args[i] = JsonUtils.fromJson(body, type);
                     }
                 }
-
-
                 Object result = method.invoke(controller, args);
 
                 if (result != null) {
@@ -114,8 +111,6 @@ public class RouterRegister {
                     else {
                         res.send(result.toString());
                     }
-                } else {
-                    res.send("");
                 }
 
             } catch (Exception e) {
