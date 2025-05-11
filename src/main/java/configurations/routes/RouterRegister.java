@@ -88,7 +88,7 @@ public class RouterRegister {
                     } else if (parameter.isAnnotationPresent(QueryParam.class)) {
                         String key = parameter.getAnnotation(QueryParam.class).value();
                         String rawValue = req.getQueryParam(key); // Método que você precisa expor no Request
-
+                        System.out.println("QueryParam - " + key + ": valor presente " + rawValue);
                         // Conversão simples
                         Object value = convertValue(rawValue, type);
                         args[i] = value;

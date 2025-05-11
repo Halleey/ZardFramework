@@ -11,6 +11,7 @@ import configurations.requests.Response;
 import project.dtos.UserResponseDTO;
 import project.services.UserService;
 import java.io.IOException;
+import java.time.Year;
 import java.util.List;
 @RestController
 @RequestController("/user")
@@ -44,14 +45,11 @@ public class ControllerTeste {
     //Versãoc com ResponseEntity
 
     @GetRouter("/todos")
-    public ResponseEntity<String> pegatodos() {
+    public ResponseEntity<List<Users>> pegatodos() {
         // Chama o serviço para pegar todos os usuários
         List<Users> usersList = service.getAll();
-
-        // Converte a lista de usuários para JSON
-        String jsonResponse = JsonUtils.toJson(usersList);
         // Envia a resposta com a lista de usuários
-        return ResponseEntity.ok(jsonResponse);
+        return ResponseEntity.ok(usersList);
     }
 
 
@@ -69,23 +67,13 @@ public class ControllerTeste {
         }
     }
 
-
     @GetRouter("/find")
-    public ResponseEntity<String> findId(Request request) {
-        String idStr = request.extractPathParam("/user/find");
-        Long  address_id = Long.valueOf(idStr);
-        System.out.println("DEBUG: ID convertido para Long: " + address_id);
+    public ResponseEntity<List<Users>> findIdParam(@QueryParam("id") Long id) {
 
-        List<Users> users = service.getUserById(address_id);
+        List<Users> users = service.getUserById(id);
 
-
-        String json = JsonUtils.toJson(users);
-        System.out.println("DEBUG: JSON gerado: " + json);
-
-        System.out.println("DEBUG: Retornando ResponseEntity com JSON");
-        return ResponseEntity.ok(json);
+        return ResponseEntity.ok(users);
     }
-
 
     //Nova versão
     //usamos o curinga no response para podermos trabalhar tanto com serialização json

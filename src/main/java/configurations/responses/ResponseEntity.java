@@ -1,7 +1,5 @@
 package configurations.responses;
 
-import entities.JsonUtils;
-
 import java.util.Map;
 import java.util.Objects;
 public class ResponseEntity<T> extends HttpEntity<T> {
