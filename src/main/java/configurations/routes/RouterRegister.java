@@ -109,8 +109,9 @@ public class RouterRegister {
                             res.setHeader(header.getKey(), header.getValue());
                         }
                         Object body = entity.getBody();
-                        res.send(body != null ? body.toString() : "");
-                    } else {
+                        res.send(body);
+                    }
+                    else {
                         res.send(result.toString());
                     }
                 } else {

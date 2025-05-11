@@ -2,6 +2,7 @@ package configurations.requests;
 
 import com.sun.net.httpserver.HttpExchange;
 import configurations.responses.ResponseEntity;
+import entities.JsonUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -44,6 +45,23 @@ public class Response {
             os.write(responseBytes);
         }
     }
+
+
+    // Envia um objeto qualquer, convertendo para JSON se necessário
+    public void send(Object body) throws IOException {
+        String responseBody;
+
+        if (body instanceof String str) {
+            responseBody = str;
+        } else {
+
+            responseBody = JsonUtils.toJson(body);
+            setHeader("Content-Type", "application/json");
+        }
+
+        send(responseBody);
+    }
+
 
     // Envia diretamente com status e corpo, ignorando setStatus()
     public void send(int statusCode, String body) throws IOException {

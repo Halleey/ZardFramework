@@ -88,18 +88,18 @@ public class ControllerTeste {
 
 
     //Nova versão
+    //usamos o curinga no response para podermos trabalhar tanto com serialização json
+    // quanto retorno em String personalizado
     @GetRouter("/equals")
-    public ResponseEntity<String> getEqualsName(@QueryParam("name") String name) {
+    public ResponseEntity<?> getEqualsName(@QueryParam("name") String name) {
         if (name == null || name.isBlank()) {
-            return ResponseEntity.status(400, "Parâmetro 'name' é obrigatório");
+            return ResponseEntity.status(400, "erro, parametro obrigatorio faltando");
         }
 
         List<UserResponseDTO> users = service.getUsersByName(name);
-
-        String json = JsonUtils.toJson(users);
-
-        return ResponseEntity.ok(json);
+        return ResponseEntity.ok(users); // Objeto real!
     }
+
 
 
 //    @GetRouter("/equals")
