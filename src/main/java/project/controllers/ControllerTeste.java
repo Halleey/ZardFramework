@@ -26,11 +26,6 @@ public class ControllerTeste {
     public String helloHandler()  {
         return "Lets go !";
     }
-    @GetRouter("/hello")
-    public ResponseEntity<String> hello() {
-        return ResponseEntity.ok("Hello, luc");
-    }
-
     //Versãoc Arcaica
 
     @GetRouter("/all")
