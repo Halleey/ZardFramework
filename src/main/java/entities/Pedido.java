@@ -10,6 +10,6 @@ public class Pedido {
     Long id;
     @Column
     private String name;
-    @OneToMany(cascade = true)
+    @OneToMany(cascade = CascadeType.ALL)
     List<Product> products;
 }

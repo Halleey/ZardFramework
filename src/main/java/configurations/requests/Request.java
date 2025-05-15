@@ -5,63 +5,48 @@ import com.sun.net.httpserver.HttpExchange;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Request {
-    private final HttpExchange exchange; // O objeto HttpExchange que representa a requisição HTTP
+    private final HttpExchange exchange;
+    private Map<String, String> pathParams = new HashMap<>();
 
     public Request(HttpExchange exchange) {
-        this.exchange = exchange; // Inicializa com o HttpExchange da requisição
+        this.exchange = exchange;
     }
 
-    // Obtém o método HTTP da requisição (GET, POST, etc.)
     public String getMethod() {
         return exchange.getRequestMethod();
     }
 
-    // Obtém o caminho da URL da requisição
     public String getPath() {
         return exchange.getRequestURI().getPath();
     }
 
-    // Obtém o corpo da requisição (conteúdo enviado pelo cliente)
     public String getBody() throws IOException {
-        InputStream inputStream = exchange.getRequestBody(); // Obtém o InputStream do corpo da requisição
-        return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8); // Lê os bytes e os converte em string
+        InputStream inputStream = exchange.getRequestBody();
+        return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
     }
 
-
-    public String extractPathParam(String basePath) {
-        String fullPath = getPath(); // ex: /user/delete/4
-        if (!fullPath.startsWith(basePath)) return null;
-
-        // Remove a basePath da URL
-        String remaining = fullPath.substring(basePath.length());
-        if (remaining.startsWith("/")) {
-            remaining = remaining.substring(1);
-        }
-
-        // Retorna o primeiro segmento após o basePath
-        String[] parts = remaining.split("/");
-        return parts.length > 0 ? parts[0] : null;
-    }
-
-    // Novo método para pegar parâmetros da query string
     public String getQueryParam(String key) {
         String query = exchange.getRequestURI().getQuery();
-        if (query == null || query.isEmpty()) {
-            return null;
-        }
+        if (query == null) return null;
 
-        String[] params = query.split("&");
-        for (String param : params) {
+        for (String param : query.split("&")) {
             String[] pair = param.split("=");
             if (pair.length == 2 && pair[0].equals(key)) {
                 return pair[1];
             }
         }
-
         return null;
     }
 
+    public void setPathParams(Map<String, String> params) {
+        this.pathParams = params;
+    }
 
+    public String getPathParam(String key) {
+        return pathParams.get(key);
+    }
 }

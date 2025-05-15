@@ -1,14 +1,12 @@
 package project.controllers;
 
 import configurations.instancias.RestController;
-import configurations.routes.GetRouter;
-import configurations.routes.PatchRouter;
-import configurations.routes.RequestController;
+import configurations.responses.ResponseEntity;
+import configurations.routes.*;
 import project.dtos.ProductRequestDto;
 import entities.JsonUtils;
 import configurations.requests.Request;
 import configurations.requests.Response;
-import configurations.routes.PostRouter;
 import entities.Product;
 import project.services.ProdutoService;
 
@@ -34,6 +32,7 @@ public class ProdutoController {
         response.send("Produto salvo");
 
     }
+
     @GetRouter("")
     public void getProduct(Request request, Response response) throws IOException {
         String nome = request.getQueryParam("nome");
@@ -46,28 +45,16 @@ public class ProdutoController {
     }
 
     @PatchRouter("")
-    public void updateProductName(Request request, Response response) throws IOException {
-        // Captura o id e o novo nome da requisição
-        String idParam = request.getQueryParam("id");
-        String novoNome = request.getQueryParam("nome");
-
-        if (idParam == null || novoNome == null) {
-            response.send(400, "parametro errado");
-            response.send("Parâmetros 'id' e 'nome' são obrigatórios para atualização.");
-            return;
-        }
-
+    public ResponseEntity<String> updateProductName(@QueryParam("id") Long id, @QueryParam("nome") String nome) throws IOException {
         try {
-            Long id = Long.parseLong(idParam); // Converte o ID para Long
-            produtoService.update(id, novoNome); // Atualiza no serviço
-            response.send("Produto atualizado com sucesso.");
+            produtoService.update(id, nome);
+            return ResponseEntity.status(200, "produto atualizado com sucesso");
         } catch (NumberFormatException e) {
-            response.send(400, "campo errado ou inexistente");
-            response.send("ID inválido.");
+            return ResponseEntity.status(400, "ID inválido.");
         } catch (RuntimeException e) {
-            response.send(404, "rota não existe");
-            response.send(e.getMessage());
+            return ResponseEntity.status(404, e.getMessage());
         }
     }
+
 }
 

@@ -1,8 +1,6 @@
 package configurations.genericsRepositories;
-import configurations.dbas.OneToOne;
+import configurations.dbas.*;
 import configurations.orm.ConnectionPool;
-import configurations.dbas.Column;
-import configurations.dbas.Id;
 
 import java.lang.reflect.Field;
 import java.sql.Connection;
@@ -48,7 +46,7 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
 
         this.relationFields = RELATION_FIELDS_CACHE.computeIfAbsent(entityClass, cls ->
                 Arrays.stream(cls.getDeclaredFields())
-                        .filter(f -> f.isAnnotationPresent(OneToOne.class))
+                        .filter(f -> f.isAnnotationPresent(OneToOne.class) || f.isAnnotationPresent(OneToMany.class) || f.isAnnotationPresent(ManyToOne.class))
                         .peek(f -> f.setAccessible(true))
                         .collect(Collectors.toList())
         );
@@ -75,7 +73,6 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
                 throw new RuntimeException("Erro ao acessar campo: " + field.getName(), e);
             }
         }
-
         // Campos de relacionamento (fk)
         for (Field relationField : relationFields) {
             String columnName = relationField.getName() + "_id"; // ex: address -> address_id
@@ -211,7 +208,6 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
 
                 results.add(entity);
             }
-
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

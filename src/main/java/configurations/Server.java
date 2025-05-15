@@ -47,21 +47,21 @@ public class Server {
 
     // Método responsável por tratar as requisições recebidas
     private void handleRequest(HttpExchange exchange) throws IOException {
-        String method = exchange.getRequestMethod(); // Obtém o método HTTP da requisição
-        String path = exchange.getRequestURI().getPath(); // Obtém a URL solicitada
-        RequestHandler handler = router.findHandler(method, path); // Procura o handler para o método e caminho
+        String method = exchange.getRequestMethod();
+        String path = exchange.getRequestURI().getPath();
+        Router.RouteMatch match = router.findHandler(method, path);
 
-        if (handler != null) {
-            // Se o handler for encontrado, cria os objetos Request e Response e chama o handler
+        if (match != null) {
             Request req = new Request(exchange);
+            req.setPathParams(match.pathParams); // importante!
             Response res = new Response(exchange);
-            handler.handle(req, res); // Chama o método handle do handler com a requisição e resposta
+            match.handler.handle(req, res);
         } else {
-            // Se o handler não for encontrado, retorna um erro 404
             String notFound = "404 Not Found";
             exchange.sendResponseHeaders(404, notFound.length());
             exchange.getResponseBody().write(notFound.getBytes());
             exchange.close();
         }
     }
+
 }

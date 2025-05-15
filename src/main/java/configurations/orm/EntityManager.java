@@ -86,16 +86,7 @@ public class EntityManager {
 
             // Se for @OneToOne ou @ManyToOne, gera uma chave estrangeira
             if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
-                Class<?> refType;
-
-                // Precaução futura: se o campo for uma Collection (ex: List<Algo>), extrai o tipo genérico
-                if (Collection.class.isAssignableFrom(field.getType())) {
-                    ParameterizedType listType = (ParameterizedType) field.getGenericType();
-                    refType = (Class<?>) listType.getActualTypeArguments()[0];
-                } else {
-                    // Tipo direto (entidade referenciada)
-                    refType = field.getType();
-                }
+                Class<?> refType = getAClass(field);
 
                 String fkColumn = field.getName() + "_id";
 
@@ -135,26 +126,47 @@ public class EntityManager {
         executeSQL(sql);
     }
 
+    private static Class<?> getAClass(Field field) {
+        Class<?> refType;
 
-    private static boolean hasCascade(Class<?> entityClazz, Class<?> refType) {
-        for (Field field : entityClazz.getDeclaredFields()) {
+        // Precaução futura: se o campo for uma Collection (ex: List<Algo>), extrai o tipo genérico
+        if (Collection.class.isAssignableFrom(field.getType())) {
+            ParameterizedType listType = (ParameterizedType) field.getGenericType();
+            refType = (Class<?>) listType.getActualTypeArguments()[0];
+        } else {
+            // Tipo direto (entidade referenciada)
+            refType = field.getType();
+        }
+        return refType;
+    }
+
+
+    private static boolean hasCascade(Class<?> owningClass, Class<?> inverseClass) {
+        for (Field field : owningClass.getDeclaredFields()) {
             if (field.isAnnotationPresent(OneToMany.class)) {
-                //Usado para lidar com List<>  Maps  e afins, assim podemos extrair o parametro <?>
-                ParameterizedType parameterizedType = (ParameterizedType) field.getGenericType();
-                // Obtém o tipo da coleção (ex: List<Aluno> → Aluno)
-                Class<?> target = (Class<?>) parameterizedType.getActualTypeArguments()[0];
+                if (!Collection.class.isAssignableFrom(field.getType())) {
+                    continue;
+                }
 
-                // Compara o tipo com o tipo de referência esperado
-                if (target.equals(refType)) {
-                    // Verifica se o cascade está ativado
+                Type genericType = field.getGenericType();
+                if (!(genericType instanceof ParameterizedType pt)) {
+                    continue;
+                }
+
+                Type[] typeArgs = pt.getActualTypeArguments();
+                if (typeArgs.length != 1 || !(typeArgs[0] instanceof Class<?> targetClass)) {
+                    continue;
+                }
+
+                if (targetClass.equals(inverseClass)) {
                     OneToMany otm = field.getAnnotation(OneToMany.class);
-                    return otm.cascade(); // true = aplicar cascade
+                    return otm.cascade() == CascadeType.ALL;
                 }
             }
         }
-        // Não encontrou correspondência ou cascade desativado
         return false;
     }
+
 
 
     private static String buildColumnDefinition(Field field) {

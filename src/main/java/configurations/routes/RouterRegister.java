@@ -85,40 +85,37 @@ public class RouterRegister {
                         args[i] = res;
                     } else if (parameter.isAnnotationPresent(QueryParam.class)) {
                         String key = parameter.getAnnotation(QueryParam.class).value();
-                        String rawValue = req.getQueryParam(key); // Método que você precisa expor no Request
-                        System.out.println("QueryParam - " + key + ": valor presente " + rawValue);
-                        // Conversão simples
-                        Object value = convertValue(rawValue, type);
-                        args[i] = value;
-                    }
-                    else {
-                        // Assume corpo JSON
+                        String rawValue = req.getQueryParam(key);
+                        args[i] = convertValue(rawValue, type);
+                    } else if (parameter.isAnnotationPresent(PathParam.class)) {
+                        String key = parameter.getAnnotation(PathParam.class).value();
+                        String rawValue = req.getPathParam(key);
+                        args[i] = convertValue(rawValue, type);
+                    } else {
                         String body = req.getBody();
                         args[i] = JsonUtils.fromJson(body, type);
                     }
                 }
-                Object result = method.invoke(controller, args);
 
+                Object result = method.invoke(controller, args);
                 if (result != null) {
                     if (result instanceof ResponseEntity<?> entity) {
                         res.setStatus(entity.getStatusCode());
                         for (Map.Entry<String, String> header : entity.getHeaders().entrySet()) {
                             res.setHeader(header.getKey(), header.getValue());
                         }
-                        Object body = entity.getBody();
-                        res.send(body);
-                    }
-                    else {
+                        res.send(entity.getBody());
+                    } else {
                         res.send(result.toString());
                     }
                 }
-
             } catch (Exception e) {
-                e.printStackTrace(); // Para debug
-                res.send(500, "Erro interno no servidor: " + e.getMessage());
+                e.printStackTrace();
+                res.send(500, "Erro interno: " + e.getMessage());
             }
         };
     }
+
 
     private static Object convertValue(String value, Class<?> type) {
         if (value == null) return null;

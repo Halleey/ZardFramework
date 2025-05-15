@@ -45,25 +45,20 @@ public class ControllerTeste {
 
     @GetRouter("/todos")
     public ResponseEntity<List<Users>> pegatodos() {
-        // Chama o serviço para pegar todos os usuários
         List<Users> usersList = service.getAll();
-        // Envia a resposta com a lista de usuários
         return ResponseEntity.ok(usersList);
     }
 
-    @DeleteRouter("/delete")
-    public void deleteUser(Request req, Response res) throws IOException {
-        String idStr = req.extractPathParam("/user/delete");
-        Long id = Long.valueOf(idStr);
-
+    @DeleteRouter("/delete/{id}")
+    public ResponseEntity<String> deleteUser(@PathParam("id") Long id) {
         boolean deleted = service.deleteUser(id);
-
         if (deleted) {
-            res.send("Usuário deletado com sucesso!");
+            return ResponseEntity.status(200, "usuário deletado com sucesso");
         } else {
-            res.send("Usuário não encontrado!");
+            return ResponseEntity.status(404, "usuário não encontrado");
         }
     }
+
 
     @GetRouter("/find")
     public ResponseEntity<List<Users>> findIdParam(@QueryParam("id") Long id) {
