@@ -1,5 +1,6 @@
 package configurations.requests;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 
 import java.io.IOException;
@@ -41,6 +42,16 @@ public class Request {
         }
         return null;
     }
+
+    public Map<String, String> getHeaders() {
+        Map<String, String> headersMap = new HashMap<>();
+        Headers headers = exchange.getRequestHeaders();
+        for (String key : headers.keySet()) {
+            headersMap.put(key, headers.getFirst(key));
+        }
+        return headersMap;
+    }
+
 
     public void setPathParams(Map<String, String> params) {
         this.pathParams = params;

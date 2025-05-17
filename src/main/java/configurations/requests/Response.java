@@ -47,6 +47,20 @@ public class Response {
     }
 
 
+    public void sendStatus(int statusCode) throws IOException {
+        setStatus(statusCode);
+        // Envia uma resposta vazia
+        exchange.sendResponseHeaders(statusCode, -1);
+        close();
+    }
+
+    // Método para fechar o exchange (útil em filtros)
+    public void close() throws IOException {
+        exchange.close();
+    }
+
+
+
     // Envia um objeto qualquer, convertendo para JSON se necessário
     public void send(Object body) throws IOException {
         String responseBody;

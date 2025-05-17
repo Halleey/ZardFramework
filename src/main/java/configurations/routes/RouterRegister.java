@@ -5,6 +5,10 @@ import configurations.handlers.RequestHandler;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.responses.ResponseEntity;
+import configurations.security.AuthFilter;
+import configurations.security.EnableSecurity;
+import configurations.security.FilterException;
+import configurations.security.SecurityFilter;
 import entities.JsonUtils;
 
 import java.lang.reflect.Method;
@@ -16,30 +20,33 @@ public class RouterRegister {
         Class<?> controllerClass = controller.getClass();
         String basePath = getBasePath(controllerClass);
 
+        boolean isSecurity = controllerClass.isAnnotationPresent(EnableSecurity.class);
+        SecurityFilter securityFilter = new SecurityFilter();
+        if (isSecurity) {
+            securityFilter.addFilter(new AuthFilter()); // Adiciona o filtro caso algum controller tenha @EnableSecurity
+        }
+
         Method[] methods = controllerClass.getDeclaredMethods();
         for (Method method : methods) {
             if (method.isAnnotationPresent(GetRouter.class)) {
-                GetRouter getRoute = method.getAnnotation(GetRouter.class);
-                String path = combinePaths(basePath, getRoute.value());
-                server.get(path, createHandler(controller, method));
+                String path = combinePaths(basePath, method.getAnnotation(GetRouter.class).value());
+                server.get(path, createHandler(controller, method, isSecurity, securityFilter));
             }
             if (method.isAnnotationPresent(PostRouter.class)) {
-                PostRouter postRoute = method.getAnnotation(PostRouter.class);
-                String path = combinePaths(basePath, postRoute.value());
-                server.post(path, createHandler(controller, method));
+                String path = combinePaths(basePath, method.getAnnotation(PostRouter.class).value());
+                server.post(path, createHandler(controller, method, isSecurity, securityFilter));
             }
             if (method.isAnnotationPresent(DeleteRouter.class)) {
-                DeleteRouter deleteRoute = method.getAnnotation(DeleteRouter.class);
-                String path = combinePaths(basePath, deleteRoute.value());
-                server.delete(path, createHandler(controller, method));
+                String path = combinePaths(basePath, method.getAnnotation(DeleteRouter.class).value());
+                server.delete(path, createHandler(controller, method, isSecurity, securityFilter));
             }
             if (method.isAnnotationPresent(PatchRouter.class)) {
-                PatchRouter patchRoute = method.getAnnotation(PatchRouter.class);
-                String path = combinePaths(basePath, patchRoute.value());
-                server.patch(path, createHandler(controller, method));
- }
+                String path = combinePaths(basePath, method.getAnnotation(PatchRouter.class).value());
+                server.patch(path, createHandler(controller, method, isSecurity, securityFilter));
             }
+        }
     }
+
 
     private static String getBasePath(Class<?> controllerClass) {
         String basePath = "";
@@ -69,9 +76,15 @@ public class RouterRegister {
     }
 
     //Terminar outra hora suporte dinamico para RequestParam e PathParam
-    private static RequestHandler createHandler(Object controller, Method method) {
+    private static RequestHandler createHandler(Object controller, Method method, boolean isSecurity, SecurityFilter securityFilter) {
         return (req, res) -> {
             try {
+                // Executa filtros de segurança, se habilitado
+                if (isSecurity) {
+                    securityFilter.doFilter(req, res);
+                }
+
+                // Monta os parâmetros
                 Parameter[] parameters = method.getParameters();
                 Object[] args = new Object[parameters.length];
 
@@ -109,6 +122,9 @@ public class RouterRegister {
                         res.send(result.toString());
                     }
                 }
+            } catch (FilterException e) {
+                // Filtro já tratou a resposta, só loga se quiser
+                System.out.println("Bloqueado pelo filtro: " + e.getMessage());
             } catch (Exception e) {
                 e.printStackTrace();
                 res.send(500, "Erro interno: " + e.getMessage());

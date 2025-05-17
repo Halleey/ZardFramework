@@ -18,7 +18,7 @@ public class StressPostMethod {
 
     public static void main(String[] args) throws InterruptedException {
         ExecutorService executor = Executors.newFixedThreadPool(50);
-        int totalRequests = 1000;
+        int totalRequests = 2000;
 
         List<Long> latencies = Collections.synchronizedList(new ArrayList<>());
 

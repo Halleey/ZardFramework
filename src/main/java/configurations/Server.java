@@ -40,12 +40,11 @@ public class Server {
     public void start() throws IOException {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0); // Cria o servidor HTTP na porta definida
         server.createContext("/", this::handleRequest); // Define o manipulador de requisições para todas as requisições (caminho raiz "/")
-        server.setExecutor(Executors.newFixedThreadPool(10)); // Configura um pool de threads para lidar com requisições de forma concorrente
+        server.setExecutor(Executors.newFixedThreadPool(20)); // Configura um pool de threads para lidar com requisições de forma concorrente
         server.start(); // Inicia o servidor
         System.out.println("Servidor rodando na porta " + port);
     }
 
-    // Método responsável por tratar as requisições recebidas
     private void handleRequest(HttpExchange exchange) throws IOException {
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
@@ -58,6 +57,8 @@ public class Server {
             match.handler.handle(req, res);
         } else {
             String notFound = "404 Not Found";
+            System.out.println("Thread: " + Thread.currentThread().getName() +
+                    " não encontrou rota para: " + path);
             exchange.sendResponseHeaders(404, notFound.length());
             exchange.getResponseBody().write(notFound.getBytes());
             exchange.close();

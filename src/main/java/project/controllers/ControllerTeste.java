@@ -3,6 +3,7 @@ package project.controllers;
 import configurations.instancias.RestController;
 import configurations.responses.ResponseEntity;
 import configurations.routes.*;
+import configurations.security.EnableSecurity;
 import entities.JsonUtils;
 import project.dtos.UserRequestDto;
 import entities.Users;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.util.List;
 @RestController
 @RequestController("/user")
+@EnableSecurity
 public class ControllerTeste {
 
     private final UserService service;
