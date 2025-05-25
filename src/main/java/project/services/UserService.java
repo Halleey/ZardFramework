@@ -1,5 +1,6 @@
 package project.services;
 
+import configurations.cripted.HashPassword;
 import configurations.instancias.Service;
 import project.dtos.UserRequestDto;
 
@@ -26,6 +27,8 @@ public class UserService {
     public void createUser(UserRequestDto  requestDto) {
         Users user = new Users();
         user.setName(requestDto.getName());
+        String password = HashPassword.gerarHash(requestDto.getPassword());
+        user.setPassword(password);
         user.setEmail(requestDto.getEmail());
         user.setCpf(requestDto.getCpf());
         Address address = addressRepository.findById(requestDto.getAddress_id()).orElseThrow(() -> new RuntimeException("não tem esse id"));

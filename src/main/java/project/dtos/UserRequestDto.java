@@ -2,6 +2,7 @@ package project.dtos;
 
 public class UserRequestDto {
     String name;
+    String password;
     String email;
     String cpf;
     private Long address_id;
@@ -12,6 +13,10 @@ public class UserRequestDto {
 
     public void setAddress_id(Long address_id) {
         this.address_id = address_id;
+    }
+
+    public String getPassword() {
+        return password;
     }
 
     public String getName() {

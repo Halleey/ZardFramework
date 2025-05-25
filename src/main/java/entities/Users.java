@@ -12,11 +12,21 @@ public class Users {
     @Column
     private String name;
     @Column
+    private String password;
+    @Column
     private String email;
     @Column
     private String cpf;
     @OneToOne(referencedColumnName = "address_id")
     private Address address;
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public Address getAddress() {
         return address;

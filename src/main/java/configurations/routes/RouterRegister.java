@@ -1,5 +1,4 @@
 package configurations.routes;
-
 import configurations.Server;
 import configurations.handlers.RequestHandler;
 import configurations.requests.Request;

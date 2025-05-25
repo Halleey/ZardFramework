@@ -1,4 +1,3 @@
-
 import configurations.orm.EntityManager;
 import configurations.routes.RouterRegister;
 import configurations.Server;

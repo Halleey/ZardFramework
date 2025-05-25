@@ -1,7 +1,6 @@
 package configurations.requests;
 
 import com.sun.net.httpserver.HttpExchange;
-import configurations.responses.ResponseEntity;
 import entities.JsonUtils;
 
 import java.io.IOException;
@@ -75,8 +74,6 @@ public class Response {
 
         send(responseBody);
     }
-
-
     // Envia diretamente com status e corpo, ignorando setStatus()
     public void send(int statusCode, String body) throws IOException {
         setStatus(statusCode);
