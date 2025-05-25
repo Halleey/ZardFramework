@@ -1,29 +1,15 @@
 package configurations.cripted;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import org.mindrot.jbcrypt.BCrypt;
 
 public class HashPassword {
 
-    public static String gerarHash(String senha) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            byte[] hashBytes = md.digest(senha.getBytes());
-            return bytesParaHex(hashBytes);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Erro ao gerar hash SHA-256", e);
-        }
+    public static String gerarHash(String senhaPura) {
+        return BCrypt.hashpw(senhaPura, BCrypt.gensalt(12));
     }
 
-    public static boolean verificarSenha(String senhaDigitada, String hashSalvo) {
-        return gerarHash(senhaDigitada).equals(hashSalvo);
-    }
-
-    private static String bytesParaHex(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
-        }
-        return sb.toString();
+    // Verifica se a senha fornecida corresponde ao hash armazenado
+    public static boolean verificarSenha(String senhaPura, String hashArmazenado) {
+        return BCrypt.checkpw(senhaPura, hashArmazenado);
     }
 }
