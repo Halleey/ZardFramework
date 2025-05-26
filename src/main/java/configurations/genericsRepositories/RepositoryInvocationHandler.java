@@ -91,7 +91,15 @@ public class RepositoryInvocationHandler implements InvocationHandler {
                 }
 
                 System.out.println("Consulta executada com sucesso. Total de entidades mapeadas: " + results.size());
-                return results;
+
+                // 🔁 Ajuste do retorno com base na assinatura do método
+                if (List.class.isAssignableFrom(method.getReturnType())) {
+                    return results;
+                } else if (!results.isEmpty()) {
+                    return results.get(0); // Apenas o primeiro resultado
+                } else {
+                    return null;
+                }
 
             } catch (SQLException e) {
                 System.err.println("Erro SQL: " + e.getMessage());
@@ -102,8 +110,9 @@ public class RepositoryInvocationHandler implements InvocationHandler {
             }
         }
 
-        // Chamada padrão: save, findAll, etc.
-        return method.invoke(genericRepository, args);
+        // Chamadas padrão (ex: save, findAll)
+        Method targetMethod = genericRepository.getClass().getMethod(method.getName(), method.getParameterTypes());
+        return targetMethod.invoke(genericRepository, args);
     }
 
     private Class<?> getReturnTypeClass(Method method) {

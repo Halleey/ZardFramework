@@ -2,6 +2,7 @@ package project.services;
 
 import configurations.cripted.HashPassword;
 import configurations.instancias.Service;
+import project.dtos.CheckPasswordDto;
 import project.dtos.UserRequestDto;
 
 import entities.Address;
@@ -68,5 +69,11 @@ public class UserService {
     public String toString() {
         return "UserService [repository=" + repository + ", addressRepository=" + addressRepository + "]";
     }
+
+    public boolean CheckPassword(CheckPasswordDto passwordDto){
+       Users users = repository.findByName(passwordDto.getName());
+        return HashPassword.verificarSenha(passwordDto.getPassword(), users.getPassword());
+    }
+
 
 }

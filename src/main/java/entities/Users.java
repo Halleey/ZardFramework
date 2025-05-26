@@ -1,9 +1,6 @@
 package entities;
 
-import configurations.dbas.Column;
-import configurations.dbas.Entity;
-import configurations.dbas.Id;
-import configurations.dbas.OneToOne;
+import configurations.dbas.*;
 
 @Entity()
 public class Users {
@@ -14,6 +11,7 @@ public class Users {
     @Column
     private String password;
     @Column
+    @Unique
     private String email;
     @Column
     private String cpf;

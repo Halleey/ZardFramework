@@ -185,6 +185,12 @@ public class EntityManager {
             columnDef.append(" PRIMARY KEY AUTO_INCREMENT");
         }
 
+       if(field.isAnnotationPresent(Unique.class)){
+           Unique unique = field.getAnnotation(Unique.class);
+           if(unique.value()){
+               columnDef.append(" UNIQUE");
+           }
+       }
         return columnDef.toString();
     }
 
@@ -245,7 +251,5 @@ public class EntityManager {
 
         return pt.getActualTypeArguments();
     }
-
-
 }
 

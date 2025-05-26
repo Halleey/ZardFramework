@@ -7,6 +7,7 @@ import entities.Users;
 import project.dtos.UserResponseDTO;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface UserRepository extends GenericRepository<Users, Long> {
@@ -17,4 +18,9 @@ public interface UserRepository extends GenericRepository<Users, Long> {
 
     @Querys("SELECT name, address_id FROM frame.users where name = ?")
     List<UserResponseDTO> findUsersByName(String name);
+
+    @Querys("SELECT * FROM users WHERE name = ?")
+    Users findByName(String name);
+
+
 }

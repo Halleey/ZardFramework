@@ -5,6 +5,7 @@ import configurations.responses.ResponseEntity;
 import configurations.routes.*;
 import configurations.security.EnableSecurity;
 import entities.JsonUtils;
+import project.dtos.CheckPasswordDto;
 import project.dtos.UserRequestDto;
 import entities.Users;
 import configurations.requests.Request;
@@ -96,6 +97,24 @@ public class ControllerTeste {
         service.createUser(user); // chama o service certinho
         response.send("Salvando da forma velha");
     }
+    @PostRouter("/check-password")
+    public ResponseEntity<String> verificarSenha(CheckPasswordDto dto) {
+        try {
+            boolean senhaCorreta = service.CheckPassword(dto);
+
+            if (senhaCorreta) {
+                return ResponseEntity.ok("Senha correta");
+            } else {
+                return ResponseEntity.status(401, "Senha incorreta");
+            }
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404, e.getMessage());
+        }
+    }
+
+
+
+
 }
 
 
