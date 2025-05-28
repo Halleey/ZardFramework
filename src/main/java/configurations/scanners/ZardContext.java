@@ -4,6 +4,8 @@ import configurations.genericsRepositories.RepositoryFactory;
 import configurations.instancias.Repository;
 import configurations.instancias.RestController;
 import configurations.instancias.Service;
+import configurations.security.EnableSecurity;
+import configurations.security.auth.SecurityConfig;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
@@ -30,6 +32,26 @@ public class ZardContext {
             // Adiciona o repositório instanciado ao contêiner
             container.put(clazz, instance);
         }
+
+        // Instancia a classe de configuração de segurança anotada com @EnableSecurity
+        Set<Class<?>> securityConfigs = ClassScanner.getAnnotatedClasses(basePackage, EnableSecurity.class);
+        if (!securityConfigs.isEmpty()) {
+            if (securityConfigs.size() > 1) {
+                throw new RuntimeException("Apenas uma classe pode ser anotada com @EnableSecurity.");
+            }
+
+            Class<?> configClass = securityConfigs.iterator().next();
+
+            // Cria a instância da configuração
+            SecurityConfig securityConfig = (SecurityConfig) configClass.getDeclaredConstructor().newInstance();
+
+            // Executa o método configure()
+            securityConfig.configure();
+
+            // Armazena como singleton global do tipo base
+            container.put(SecurityConfig.class, securityConfig);
+        }
+
 
         // Instancia todos os serviços anotados com @Service
         for (Class<?> clazz : ClassScanner.getAnnotatedClasses(basePackage, Service.class)) {

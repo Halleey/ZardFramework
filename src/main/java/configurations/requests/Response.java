@@ -1,7 +1,7 @@
 package configurations.requests;
 
 import com.sun.net.httpserver.HttpExchange;
-import entities.JsonUtils;
+import project.entities.JsonUtils;
 
 import java.io.IOException;
 import java.io.OutputStream;

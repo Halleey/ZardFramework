@@ -2,7 +2,7 @@ package project.services;
 
 import configurations.instancias.Service;
 import project.dtos.AddresRequestDto;
-import entities.Address;
+import project.entities.Address;
 import project.repositories.AddressRepository;
 
 @Service

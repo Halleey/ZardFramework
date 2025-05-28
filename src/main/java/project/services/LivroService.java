@@ -1,7 +1,7 @@
 package project.services;
 
 import configurations.instancias.Service;
-import entities.Livros;
+import project.entities.Livros;
 import project.dtos.LivroDto;
 import project.repositories.LivroRepositorio;
 @Service

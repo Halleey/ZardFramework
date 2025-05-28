@@ -4,10 +4,10 @@ import configurations.instancias.RestController;
 import configurations.responses.ResponseEntity;
 import configurations.routes.*;
 import project.dtos.ProductRequestDto;
-import entities.JsonUtils;
+import project.entities.JsonUtils;
 import configurations.requests.Request;
 import configurations.requests.Response;
-import entities.Product;
+import project.entities.Product;
 import project.services.ProdutoService;
 
 import java.io.IOException;

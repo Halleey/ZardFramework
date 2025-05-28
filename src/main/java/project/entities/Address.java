@@ -1,4 +1,4 @@
-package entities;
+package project.entities;
 
 import configurations.dbas.Column;
 import configurations.dbas.Entity;

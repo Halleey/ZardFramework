@@ -130,19 +130,19 @@ public class ControllerTeste {
 
 ```java
 public class ZardFrameworkApplication {
-    public static void main(String[] args) throws Exception {
-        Server app = new Server(8080);
+  public static void main(String[] args) throws Exception {
+    Server app = new Server(8080);
 
-        EntityManager.generateSchema("entities");
-        ZardContext context = new ZardContext();
-        context.initialize("project");
+    EntityManager.generateSchema("project/entities");
+    ZardContext context = new ZardContext();
+    context.initialize("project");
 
-        for (Object controller : context.getControllers()) {
-            RouterRegister.registerRoutes(app, controller);
-        }
-
-        app.start();
+    for (Object controller : context.getControllers()) {
+      RouterRegister.registerRoutes(app, controller);
     }
+
+    app.start();
+  }
 }
 ```
 

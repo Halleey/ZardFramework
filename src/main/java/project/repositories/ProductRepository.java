@@ -3,7 +3,7 @@ package project.repositories;
 import configurations.dbas.Querys;
 import configurations.genericsRepositories.GenericRepository;
 import configurations.instancias.Repository;
-import entities.Product;
+import project.entities.Product;
 
 
 import java.util.List;

@@ -4,24 +4,25 @@ import configurations.handlers.RequestHandler;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.responses.ResponseEntity;
-import configurations.security.AuthFilter;
-import configurations.security.EnableSecurity;
 import configurations.security.FilterException;
 import configurations.security.SecurityFilter;
 import configurations.security.auth.SecurityConfig;
-import entities.JsonUtils;
+import project.entities.JsonUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.Map;
 public class RouterRegister {
 
+
     public static void registerRoutes(Server server, Object controller, SecurityConfig securityConfig) {
         Class<?> controllerClass = controller.getClass();
         String basePath = getBasePath(controllerClass);
 
-        // Garante que as configurações foram aplicadas
-        securityConfig.configure();
+        // Aplica configuração de segurança se estiver presente
+        if (securityConfig != null) {
+            securityConfig.configure();
+        }
 
         Method[] methods = controllerClass.getDeclaredMethods();
         for (Method method : methods) {
@@ -43,10 +44,17 @@ public class RouterRegister {
             }
 
             if (httpMethod != null && path != null) {
-                boolean isPublic = securityConfig.getRouteControl().isPublic(httpMethod, path);
-                boolean applySecurity = !isPublic;
+                boolean applySecurity = false;
+                SecurityFilter filter = new SecurityFilter(); // neutro por padrão
 
-                SecurityFilter filter = applySecurity ? securityConfig.getFilterChain() : new SecurityFilter();
+                if (securityConfig != null) {
+                    boolean isPublic = securityConfig.getRouteControl().isPublic(httpMethod, path);
+                    applySecurity = !isPublic;
+                    if (applySecurity) {
+                        filter = securityConfig.getFilterChain();
+                    }
+                }
+
                 RequestHandler handler = createHandler(controller, method, applySecurity, filter);
 
                 switch (httpMethod) {
@@ -56,9 +64,12 @@ public class RouterRegister {
                     case "PATCH" -> server.patch(path, handler);
                     default -> throw new IllegalArgumentException("Método HTTP não suportado: " + httpMethod);
                 }
+
+                System.out.printf("Registrada: [%s] %s %s\n", httpMethod, path, applySecurity ? "(PROTEGIDA)" : "(PÚBLICA)");
             }
         }
     }
+
 
     private static String getBasePath(Class<?> controllerClass) {
         String basePath = "";
@@ -148,7 +159,6 @@ public class RouterRegister {
         if (targetType == long.class || targetType == Long.class) return Long.parseLong(value);
         if (targetType == double.class || targetType == Double.class) return Double.parseDouble(value);
         if (targetType == boolean.class || targetType == Boolean.class) return Boolean.parseBoolean(value);
-        // Adicione mais conversões conforme necessário
         return null;
     }
 }

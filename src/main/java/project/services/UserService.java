@@ -5,8 +5,8 @@ import configurations.instancias.Service;
 import project.dtos.CheckPasswordDto;
 import project.dtos.UserRequestDto;
 
-import entities.Address;
-import entities.Users;
+import project.entities.Address;
+import project.entities.Users;
 
 import project.dtos.UserResponseDTO;
 import project.repositories.AddressRepository;

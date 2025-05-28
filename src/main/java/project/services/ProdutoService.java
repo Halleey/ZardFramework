@@ -2,7 +2,7 @@ package project.services;
 
 import configurations.instancias.Service;
 import project.dtos.ProductRequestDto;
-import entities.Product;
+import project.entities.Product;
 import project.repositories.ProductRepository;
 
 import java.util.List;

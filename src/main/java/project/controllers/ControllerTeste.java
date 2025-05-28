@@ -3,11 +3,10 @@ package project.controllers;
 import configurations.instancias.RestController;
 import configurations.responses.ResponseEntity;
 import configurations.routes.*;
-import configurations.security.EnableSecurity;
-import entities.JsonUtils;
+import project.entities.JsonUtils;
 import project.dtos.CheckPasswordDto;
 import project.dtos.UserRequestDto;
-import entities.Users;
+import project.entities.Users;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import project.dtos.UserResponseDTO;
@@ -16,7 +15,6 @@ import java.io.IOException;
 import java.util.List;
 @RestController
 @RequestController("/user")
-@EnableSecurity
 public class ControllerTeste {
 
     private final UserService service;
@@ -96,6 +94,13 @@ public class ControllerTeste {
 
         service.createUser(user); // chama o service certinho
         response.send("Salvando da forma velha");
+    }
+
+
+    @GetRouter("/check-password")
+    public ResponseEntity<String> reply(){
+        return ResponseEntity.status(200, "funcionou");
+
     }
     @PostRouter("/check-password")
     public ResponseEntity<String> verificarSenha(CheckPasswordDto dto) {
