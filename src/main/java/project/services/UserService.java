@@ -34,7 +34,7 @@ public class UserService {
         user.setCpf(requestDto.getCpf());
         Address address = addressRepository.findById(requestDto.getAddress_id()).orElseThrow(() -> new RuntimeException("não tem esse id"));
         user.setAddress(address);
-        System.out.println("Address recuperado: " + address);
+//        System.out.println("Address recuperado: " + address);
         repository.save(user);
     }
 

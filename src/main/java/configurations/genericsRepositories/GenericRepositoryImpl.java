@@ -21,6 +21,7 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
     private static final Map<Class<?>, Field> ID_FIELD_CACHE = new ConcurrentHashMap<>();
     private static final Map<Class<?>, List<Field>> COLUMN_FIELDS_CACHE = new ConcurrentHashMap<>();
     private static final Map<Class<?>, List<Field>> RELATION_FIELDS_CACHE = new ConcurrentHashMap<>();
+    private static final Map<Class<?>, Field> RELATED_ID_CACHE = new ConcurrentHashMap<>();
 
     public GenericRepositoryImpl(Class<T> entityClass) {
         this.entityClass = entityClass;
@@ -82,13 +83,15 @@ public class GenericRepositoryImpl<T, ID> implements GenericRepository<T, ID> {
             try {
                 Object relatedEntity = relationField.get(entity);
                 if (relatedEntity != null) {
-                    Field relatedId = Arrays.stream(relatedEntity.getClass().getDeclaredFields())
-                            .filter(f -> f.isAnnotationPresent(Id.class))
-                            .findFirst()
-                            .orElseThrow(() -> new RuntimeException("Entidade relacionada " +
-                                    relatedEntity.getClass().getSimpleName() + " não tem @Id"));
+                    Field relatedId = RELATED_ID_CACHE.computeIfAbsent(relatedEntity.getClass(), cls ->
+                            Arrays.stream(cls.getDeclaredFields())
+                                    .filter(f -> f.isAnnotationPresent(Id.class))
+                                    .peek(f -> f.setAccessible(true))
+                                    .findFirst()
+                                    .orElseThrow(() -> new RuntimeException("Entidade relacionada " +
+                                            cls.getSimpleName() + " não tem @Id"))
+                    );
 
-                    relatedId.setAccessible(true);
                     Object fkValue = relatedId.get(relatedEntity);
                     values.add(fkValue);
                 } else {
