@@ -21,4 +21,13 @@ public class SecurityFilter {
             // Se algum filtro lançar FilterException, a execução para aqui
         }
     }
+    public static String normalize(String path) {
+        if (path == null || path.isEmpty()) return "/";
+        if (!path.startsWith("/")) path = "/" + path;
+        if (path.length() > 1 && path.endsWith("/")) {
+            return path.substring(0, path.length() - 1);
+        }
+        return path;
+    }
 }
+

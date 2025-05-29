@@ -8,14 +8,13 @@ public class ClassScanner {
 
     public static Set<Class<?>> getAnnotatedClasses(String basePackage, Class<?> annotationClass) {
         Reflections reflections = new Reflections(basePackage);
-        Set<Class<?>> annotatedClasses = reflections.getTypesAnnotatedWith((Class<? extends Annotation>) annotationClass);
 
+//
+//        //System.out.println(" Classes anotadas com @" + annotationClass.getSimpleName() + " em '" + basePackage + "':");
+//        for (Class<?> clazz : annotatedClasses) {
+//         //   System.out.println(" ->  " + clazz.getName());
+//        }
 
-        System.out.println(" Classes anotadas com @" + annotationClass.getSimpleName() + " em '" + basePackage + "':");
-        for (Class<?> clazz : annotatedClasses) {
-            System.out.println(" ->  " + clazz.getName());
-        }
-
-        return annotatedClasses;
+        return reflections.getTypesAnnotatedWith((Class<? extends Annotation>) annotationClass);
     }
 }

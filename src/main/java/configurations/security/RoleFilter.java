@@ -6,8 +6,9 @@ import configurations.security.auth.SecurityRouteControl;
 import io.jsonwebtoken.Claims;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Set;
+
+import static configurations.security.SecurityFilter.normalize;
 
 public class RoleFilter implements FilterClass{
 
@@ -18,9 +19,10 @@ public class RoleFilter implements FilterClass{
     }
 
     @Override
+
     public void doFilter(Request request, Response response, SecurityFilter securityFilter) throws IOException, FilterException {
         String method = request.getMethod();
-        String path = request.getPath();
+        String path = SecurityFilter.normalize(request.getPath()); // <- normaliza aqui
 
         // Verifica se a rota exige role
         if (!routeControl.requiresRole(method, path)) return;
