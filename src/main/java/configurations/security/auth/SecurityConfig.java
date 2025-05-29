@@ -12,7 +12,6 @@ public abstract class SecurityConfig {
     public SecurityRouteControl getRouteControl() {
         return routeControl;
     }
-
     public SecurityFilter getFilterChain() {
         return filterChain;
     }

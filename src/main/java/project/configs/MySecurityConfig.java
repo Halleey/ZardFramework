@@ -11,7 +11,7 @@ public class MySecurityConfig extends SecurityConfig {
         // Liberar login e rota pública.
         permit("POST", "/user/check-password");
         permit("GET", "/publico/hello");
-
+        permit("POST", "/user/login");
         //adiciona o tipo de filtro a ser usado.
         addFilter(new AuthFilter());
     }

@@ -2,20 +2,39 @@ package configurations.security;
 
 import configurations.requests.Request;
 import configurations.requests.Response;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
+import io.jsonwebtoken.JwtException;
+import project.jwt.JwtUtil;
 
 import java.io.IOException;
-
 public class AuthFilter implements FilterClass {
     @Override
     public void doFilter(Request request, Response response, SecurityFilter securityFilter) throws IOException, FilterException {
         String token = request.getHeaders().get("Authorization");
 
-        if (token == null || !token.equals("teste")) {
-            String forbidden = "403 Forbidden - Acesso Negado";
-            response.setHeader("Content-Type", "text/plain; charset=UTF-8");
-            response.send(403, forbidden);  // usa send(status, body)
-            response.close();
-            throw new FilterException("Acesso negado pelo filtro de autenticação.");
+        if (token == null || !token.startsWith("Bearer ")) {
+            deny(response);
+            return;
         }
+
+        token = token.substring(7); // Remove "Bearer "
+
+        try {
+            Jws<Claims> claims = JwtUtil.validateToken(token);
+
+            // Simplesmente injeta o conteúdo bruto do JWT
+            request.setAttribute("jwt.claims", claims.getBody());
+
+        } catch (JwtException e) {
+            deny(response);
+        }
+    }
+
+    private void deny(Response response) throws IOException, FilterException {
+        response.setHeader("Content-Type", "text/plain; charset=UTF-8");
+        response.send(403, "403 Forbidden - Token inválido ou ausente");
+        response.close();
+        throw new FilterException("Token inválido ou ausente");
     }
 }

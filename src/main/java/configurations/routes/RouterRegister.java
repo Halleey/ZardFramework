@@ -54,7 +54,6 @@ public class RouterRegister {
                         filter = securityConfig.getFilterChain();
                     }
                 }
-
                 RequestHandler handler = createHandler(controller, method, applySecurity, filter);
 
                 switch (httpMethod) {
@@ -69,7 +68,6 @@ public class RouterRegister {
             }
         }
     }
-
 
     private static String getBasePath(Class<?> controllerClass) {
         String basePath = "";

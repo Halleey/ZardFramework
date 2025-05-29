@@ -3,5 +3,3 @@ public class ZardFrameworkApplication {
 		ZardFramework.run(8080, "project", "project");
 	}
 }
-
-

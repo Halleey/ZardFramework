@@ -10,6 +10,7 @@ import project.entities.Users;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import project.dtos.UserResponseDTO;
+import project.jwt.JwtUtil;
 import project.services.UserService;
 import java.io.IOException;
 import java.util.List;
@@ -116,6 +117,27 @@ public class ControllerTeste {
             return ResponseEntity.status(404, e.getMessage());
         }
     }
+
+    @PostRouter("/login")
+    public ResponseEntity<String> login(CheckPasswordDto dto) {
+        try {
+            boolean senhaCorreta = service.CheckPassword(dto);
+
+            if (!senhaCorreta) {
+                return ResponseEntity.status(401, "Senha incorreta");
+            }
+
+            Users user = service.getByName(dto.getName());
+            String token = JwtUtil.generateToken(user.getName(), user.getEmail());
+
+            String json = "\"token\": \"" + token ;
+            return ResponseEntity.ok(json);
+
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(404, e.getMessage());
+        }
+    }
+
 }
 
 

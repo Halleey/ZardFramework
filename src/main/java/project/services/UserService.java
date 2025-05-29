@@ -75,5 +75,9 @@ public class UserService {
         return HashPassword.verificarSenha(passwordDto.getPassword(), users.getPassword());
     }
 
-
+    public Users getByName(String name) {
+        Users user = repository.findByName(name);
+        if (user == null) throw new RuntimeException("Usuário não encontrado");
+        return user;
+    }
 }
