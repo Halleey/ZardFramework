@@ -1,10 +1,16 @@
 package project.dtos;
 
 public class UserRequestDto {
-    String name;
-    String password;
-    String email;
-    String cpf;
+    private String name;
+    private String password;
+    private String email;
+    private String cpf;
+    private String role;
+
+    public String getRole() {
+        return role;
+    }
+
     private Long address_id;
 
     public Long getAddress_id() {

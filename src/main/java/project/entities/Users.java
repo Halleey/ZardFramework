@@ -14,9 +14,19 @@ public class Users {
     private String email;
     @Column
     private String cpf;
+    @Column
+    private String role;
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     @OneToOne(referencedColumnName = "address_id")
     private Address address;
-
     public String getPassword() {
         return password;
     }

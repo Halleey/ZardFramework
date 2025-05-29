@@ -20,7 +20,13 @@ public abstract class SecurityConfig {
         routeControl.addRoutes(method, path);
     }
 
-    protected void addFilter(FilterClass filter) {
-        filterChain.addFilter(filter);
+    protected void addFilter(FilterClass... filters) {
+        for (FilterClass filter : filters) {
+            filterChain.addFilter(filter);
+        }
+    }
+
+    protected void hasRole(String method, String path, String... roles){
+        routeControl.addProtectedRoute(method, path, roles);
     }
 }

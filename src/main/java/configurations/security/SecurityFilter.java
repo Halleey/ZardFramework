@@ -5,13 +5,14 @@ import configurations.requests.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class SecurityFilter {
     private final List<FilterClass> filters = new ArrayList<>();
 
-    public void addFilter(FilterClass filter) {
-        filters.add(filter);
+    public void addFilter(FilterClass... filters) {
+        this.filters.addAll(Arrays.asList(filters));
     }
 
     public void doFilter(Request request, Response response) throws IOException, FilterException {

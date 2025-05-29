@@ -7,6 +7,7 @@ import configurations.responses.ResponseEntity;
 import configurations.security.FilterException;
 import configurations.security.SecurityFilter;
 import configurations.security.auth.SecurityConfig;
+import configurations.security.auth.SecurityRouteControl;
 import project.entities.JsonUtils;
 
 import java.lang.reflect.Method;
@@ -45,15 +46,21 @@ public class RouterRegister {
 
             if (httpMethod != null && path != null) {
                 boolean applySecurity = false;
-                SecurityFilter filter = new SecurityFilter(); // neutro por padrão
+                SecurityFilter filter = new SecurityFilter(); // filtro vazio por padrão
 
                 if (securityConfig != null) {
-                    boolean isPublic = securityConfig.getRouteControl().isPublic(httpMethod, path);
-                    applySecurity = !isPublic;
+                    SecurityRouteControl routeControl = securityConfig.getRouteControl();
+
+                    boolean isPublic = routeControl.isPublic(httpMethod, path);
+                    boolean requiresRole = routeControl.requiresRole(httpMethod, path);
+
+                    applySecurity = !isPublic || requiresRole;
+
                     if (applySecurity) {
                         filter = securityConfig.getFilterChain();
                     }
                 }
+
                 RequestHandler handler = createHandler(controller, method, applySecurity, filter);
 
                 switch (httpMethod) {
@@ -64,12 +71,15 @@ public class RouterRegister {
                     default -> throw new IllegalArgumentException("Método HTTP não suportado: " + httpMethod);
                 }
 
-                System.out.printf("Registrada: [%s] %s %s\n", httpMethod, path, applySecurity ? "(PROTEGIDA)" : "(PÚBLICA)");
+                System.out.printf("Registrada: [%s] %s %s\n",
+                        httpMethod,
+                        path,
+                        applySecurity ? "(PROTEGIDA)" : "(PÚBLICA)"
+                );
             }
         }
     }
-
-    private static String getBasePath(Class<?> controllerClass) {
+            private static String getBasePath(Class<?> controllerClass) {
         String basePath = "";
 
         if (controllerClass.isAnnotationPresent(RequestController.class)) {

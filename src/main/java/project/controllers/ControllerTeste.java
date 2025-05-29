@@ -128,7 +128,7 @@ public class ControllerTeste {
             }
 
             Users user = service.getByName(dto.getName());
-            String token = JwtUtil.generateToken(user.getName(), user.getEmail());
+            String token = JwtUtil.generateToken(user.getName(), user.getRole());
 
             String json = "\"token\": \"" + token ;
             return ResponseEntity.ok(json);

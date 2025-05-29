@@ -32,6 +32,7 @@ public class UserService {
         user.setPassword(password);
         user.setEmail(requestDto.getEmail());
         user.setCpf(requestDto.getCpf());
+        user.setRole(requestDto.getRole());
         Address address = addressRepository.findById(requestDto.getAddress_id()).orElseThrow(() -> new RuntimeException("não tem esse id"));
         user.setAddress(address);
 //        System.out.println("Address recuperado: " + address);
