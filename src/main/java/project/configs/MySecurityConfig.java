@@ -16,6 +16,7 @@ public class MySecurityConfig extends SecurityConfig {
         permit("POST", "/user/save");
         hasRole("DELETE", "/user/delete/{id}", "admin");
         hasRole("GET", "/user", "admin");
+        hasRole("GET", "/user/equals", "admin");
         //adiciona o tipo de filtro a ser usado.
         addFilter(new AuthFilter(),  new RoleFilter(getRouteControl()));
     }
