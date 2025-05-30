@@ -38,17 +38,12 @@ public class EntityManager {
 
             // Para cada campo da entidade, verifica se existe uma dependência (chave estrangeira)
             for (Field field : entityClass.getDeclaredFields()) {
-                if (field.isAnnotationPresent(OneToOne.class)  || field.isAnnotationPresent(ManyToOne.class)) {
+                if (field.isAnnotationPresent(OneToOne.class) || field.isAnnotationPresent(ManyToOne.class)) {
                     // Adiciona a tabela referenciada como dependência
                     String referencedTable = field.getType().getSimpleName().toLowerCase();
                     td.addDependency(referencedTable);
                 }
             }
-
-
-
-
-
             // Adiciona a tabela e suas dependências no grafo
             dependencyGraph.put(tableName, td);
         }
@@ -188,9 +183,8 @@ public class EntityManager {
 
         return columnDef.toString();
     }
-
     private static StringBuilder getStringBuilder(Field field, String columnName, boolean isRequired) {
-        String sqlType = mapJavaTypeToSQL(field.getType());
+        String sqlType = mapJavaTypeToSQL(field);
         StringBuilder columnDef = new StringBuilder(columnName + " " + sqlType);
 
         if (field.isAnnotationPresent(Id.class)) {
@@ -211,10 +205,12 @@ public class EntityManager {
     }
 
 
-    private static String mapJavaTypeToSQL(Class<?> type) {
+    private static String mapJavaTypeToSQL(Field field) {
+        Class<?> type = field.getType();
+
         if (type == int.class || type == Integer.class) return "INT";
         if (type == String.class) return "VARCHAR(255)";
-        if(type == BigDecimal.class) return "DECIMAL(15,2)";
+        if (type == BigDecimal.class) return "DECIMAL(15,2)";
         if (type == boolean.class || type == Boolean.class) return "BOOLEAN";
         if (type == double.class || type == Double.class) return "DOUBLE";
         if (type == long.class || type == Long.class) return "BIGINT";
@@ -222,7 +218,20 @@ public class EntityManager {
         if (type == java.util.Date.class) return "DATETIME";
         if (type == java.sql.Date.class) return "DATE";
         if (type == java.sql.Timestamp.class) return "TIMESTAMP";
-        return "TEXT";
+        if (type == byte[].class) {
+            Column column = field.getAnnotation(Column.class);
+            BlobType blobType = column != null ? column.blobType() : BlobType.NONE;
+
+            return switch (blobType) {
+                case TINY -> "TINYBLOB";
+                case NORMAL -> "BLOB";
+                case MEDIUM -> "MEDIUMBLOB";
+                case LARGE -> "LONGBLOB";
+                default -> "BLOB";
+            };
+        }
+
+        return "TEXT"; // Fallback genérico
     }
 
     private static void executeSQL(String sql) {

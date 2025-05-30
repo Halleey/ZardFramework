@@ -31,12 +31,8 @@ public class ProdutoService {
     }
 
     public void update(Long id, String nome) {
-
-
         Product product =  repository.findById(id).orElseThrow(() -> new RuntimeException("Produto não existe"));
-
         product.setNome(nome);
-
         repository.update(product);
     }
 }

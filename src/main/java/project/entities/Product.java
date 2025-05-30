@@ -1,9 +1,6 @@
 package project.entities;
 
-import configurations.dbas.Column;
-import configurations.dbas.Entity;
-import configurations.dbas.Id;
-import configurations.dbas.ManyToOne;
+import configurations.dbas.*;
 
 import java.math.BigDecimal;
 
@@ -16,6 +13,12 @@ public class Product {
     private String nome;
     @Column
     private BigDecimal price;
+
+    @Column(blobType = BlobType.LARGE)
+    byte[] largeimage;
+
+
+
     @ManyToOne
     private Pedido ordersPedido;
     public String getNome() {
@@ -32,5 +35,13 @@ public class Product {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    public byte[] getLargeimage() {
+        return largeimage;
+    }
+
+    public void setLargeimage(byte[] largeimage) {
+        this.largeimage = largeimage;
     }
 }

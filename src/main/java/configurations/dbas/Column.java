@@ -8,5 +8,8 @@ public @interface Column {
     String value() default "";
 
     boolean required() default false;
+
+    BlobType blobType () default BlobType.NONE;
+
 }
 
