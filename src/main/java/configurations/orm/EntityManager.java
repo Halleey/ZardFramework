@@ -44,6 +44,10 @@ public class EntityManager {
                 }
             }
 
+
+
+
+
             // Adiciona a tabela e suas dependências no grafo
             dependencyGraph.put(tableName, td);
         }
@@ -171,28 +175,42 @@ public class EntityManager {
 
     private static String buildColumnDefinition(Field field) {
         String columnName = field.getName();
+        boolean isRequired = false;
+
         if (field.isAnnotationPresent(Column.class)) {
             Column column = field.getAnnotation(Column.class);
             if (!column.value().isEmpty()) {
                 columnName = column.value();
             }
+            isRequired = column.required();
         }
 
+        StringBuilder columnDef = getStringBuilder(field, columnName, isRequired);
+
+        return columnDef.toString();
+    }
+
+    private static StringBuilder getStringBuilder(Field field, String columnName, boolean isRequired) {
         String sqlType = mapJavaTypeToSQL(field.getType());
         StringBuilder columnDef = new StringBuilder(columnName + " " + sqlType);
 
         if (field.isAnnotationPresent(Id.class)) {
             columnDef.append(" PRIMARY KEY AUTO_INCREMENT");
+        } else {
+            if (isRequired) {
+                columnDef.append(" NOT NULL");
+            }
         }
 
-       if(field.isAnnotationPresent(Unique.class)){
-           Unique unique = field.getAnnotation(Unique.class);
-           if(unique.value()){
-               columnDef.append(" UNIQUE");
-           }
-       }
-        return columnDef.toString();
+        if (field.isAnnotationPresent(Unique.class)) {
+            Unique unique = field.getAnnotation(Unique.class);
+            if (unique.value()) {
+                columnDef.append(" UNIQUE");
+            }
+        }
+        return columnDef;
     }
+
 
     private static String mapJavaTypeToSQL(Class<?> type) {
         if (type == int.class || type == Integer.class) return "INT";

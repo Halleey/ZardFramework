@@ -14,7 +14,7 @@ public class Users {
     private String email;
     @Column
     private String cpf;
-    @Column
+    @Column(required = true )
     private String role;
 
     public String getRole() {
