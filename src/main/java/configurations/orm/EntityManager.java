@@ -7,6 +7,7 @@ import org.reflections.Reflections;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -171,8 +172,6 @@ public class EntityManager {
         return false;
     }
 
-
-
     private static String buildColumnDefinition(Field field) {
         String columnName = field.getName();
         boolean isRequired = false;
@@ -215,6 +214,7 @@ public class EntityManager {
     private static String mapJavaTypeToSQL(Class<?> type) {
         if (type == int.class || type == Integer.class) return "INT";
         if (type == String.class) return "VARCHAR(255)";
+        if(type == BigDecimal.class) return "DECIMAL(15,2)";
         if (type == boolean.class || type == Boolean.class) return "BOOLEAN";
         if (type == double.class || type == Double.class) return "DOUBLE";
         if (type == long.class || type == Long.class) return "BIGINT";

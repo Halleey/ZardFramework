@@ -5,6 +5,8 @@ import configurations.dbas.Entity;
 import configurations.dbas.Id;
 import configurations.dbas.ManyToOne;
 
+import java.math.BigDecimal;
+
 @Entity
 public class Product {
 
@@ -13,7 +15,7 @@ public class Product {
     @Column
     private String nome;
     @Column
-    private double price;
+    private BigDecimal price;
     @ManyToOne
     private Pedido ordersPedido;
     public String getNome() {
@@ -24,11 +26,11 @@ public class Product {
         this.nome = nome;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 }

@@ -1,14 +1,16 @@
 package project.dtos;
 
+import java.math.BigDecimal;
+
 public class ProductRequestDto {
     String nome;
-    double price;
+    BigDecimal price;
 
     public String getNome() {
         return nome;
     }
 
-    public double getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 }
