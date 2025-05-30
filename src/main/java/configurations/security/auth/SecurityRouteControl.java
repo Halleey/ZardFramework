@@ -48,7 +48,7 @@ public class SecurityRouteControl {
     }
 
     private boolean pathMatches(String pattern, String actualPath) {
-        // ex: /user/delete/{id} vira /user/delete/[^/]+
+        // ex: /user/delete/{id}/teste/ vira /user/delete/[^/]+
         String regex = pattern.replaceAll("\\{[^/]+}", "[^/]+");
         return actualPath.matches(regex);
     }

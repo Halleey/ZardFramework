@@ -56,7 +56,7 @@ public class RepositoryInvocationHandler implements InvocationHandler {
                                 String foreignKeyColumn = columnName + "_id";
                                 Object foreignKeyValue = rs.getObject(foreignKeyColumn);
 
-                                System.out.println("Campo relacional detectado: " + columnName + " -> FK: " + foreignKeyColumn);
+                               // System.out.println("Campo relacional detectado: " + columnName + " -> FK: " + foreignKeyColumn);
 
                                 if (foreignKeyValue != null) {
                                     Class<?> relatedClass = field.getType();
@@ -70,13 +70,13 @@ public class RepositoryInvocationHandler implements InvocationHandler {
                                     idField.setAccessible(true);
                                     idField.set(relatedInstance, foreignKeyValue);
                                     field.set(instance, relatedInstance);
-                                    System.out.println("Relacionamento " + columnName + " preenchido com ID: " + foreignKeyValue);
+                                 //   System.out.println("Relacionamento " + columnName + " preenchido com ID: " + foreignKeyValue);
                                 }
 
                             } else {
                                 Object value = rs.getObject(columnName);
                                 field.set(instance, value);
-                                System.out.println("Campo '" + columnName + "' preenchido com: " + value);
+                                //System.out.println("Campo '" + columnName + "' preenchido com: " + value);
                             }
 
                         } catch (SQLException sqlEx) {

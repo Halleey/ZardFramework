@@ -71,11 +71,11 @@ public class RouterRegister {
                     default -> throw new IllegalArgumentException("Método HTTP não suportado: " + httpMethod);
                 }
 
-                System.out.printf("Registrada: [%s] %s %s\n",
-                        httpMethod,
-                        path,
-                        applySecurity ? "(PROTEGIDA)" : "(PÚBLICA)"
-                );
+//                System.out.printf("Registrada: [%s] %s %s\n",
+//                        httpMethod,
+//                        path,
+//                        applySecurity ? "(PROTEGIDA)" : "(PÚBLICA)"
+//                );
             }
         }
     }
