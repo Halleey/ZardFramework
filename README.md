@@ -1,25 +1,27 @@
 # ZardFramework - Microframework Web Java
 
-> *Um mini framework web criado para aprendizado e experimentação. Sem fins lucrativos. Livre para uso, modificação(desde que seja apresentados as modificações feitas) e aprendizado.*
+> *Um mini framework web criado para aprendizado e experimentação. Sem fins lucrativos. Livre para uso, modificação (desde que sejam apresentadas as modificações feitas) e aprendizado.*
 
 ---
 
 ## 🌟 Visão Geral
 
-O **ZardFramework** é um microframework construído em Java com suporte a:
+O **ZardFramework** é um microframework construído em Java, focado em simplicidade, aprendizado e extensibilidade. Inclui recursos robustos como:
 
-* Roteamento baseado em anotações (@GetRouter, @PostRouter etc.)
-* ORM própria com suporte a:
+* 🔗 **Roteamento baseado em anotações** (`@GetRouter`, `@PostRouter`, etc.)
+* 🏛️ **ORM própria com suporte a:**
 
-  * Criação de tabelas
+  * Geração automática de tabelas
   * Chaves estrangeiras
-  * Relações 1:1, 1\:N, N:1
-  * Queries personalizadas
-* Controllers, Services, Repositories em padrão MVC
-* Suporte a `@PathParam` e `@QueryParam`
-* Verbos HTTP (GET, POST,  PATCH, DELETE)
-* Futuramente será implementado o PUT
-* Retorno padronizado via `ResponseEntity`
+  * Relacionamentos `1:1`, `1:N`, `N:1`
+  * Queries personalizadas via anotação `@Querys`
+* ⚖️ **Padrão MVC:** Controllers, Services e Repositories
+* 🌐 **Suporte a `@PathParam` e `@QueryParam`**
+* ✅ **Verbos HTTP completos:** `GET`, `POST`, `PATCH`, `DELETE` (futuro suporte a `PUT`)
+* ✨ **Serialização automática para JSON** via refleção
+* 🔒 **Autenticação JWT com controle de acesso baseado em roles**
+* ⚖️ **Configuração flexível de rotas protegidas via `@EnableSecurity`**
+* 🚀 **Resposta padronizada com `ResponseEntity`**
 
 ---
 
@@ -35,8 +37,7 @@ public @interface GetRouter { String value(); }
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PostRouter { String value(); }
-
-// PATCH, DELETE também estão disponíveis.
+// PATCH, DELETE também estão disponíveis
 ```
 
 ### ORM
@@ -172,14 +173,35 @@ public class ZardFrameworkApplication {
 
 ---
 
-## 🔒 Roadmap Futuro
+## 🔒 Exemplo de Configuração de Autenticação e Autorizacão
 
-* Criação de interceptadores de requisições
-* Implementação de serviços de login /autenticação 
-* Criação de relação N,N
+```java
+@EnableSecurity
+public class MySecurityConfig extends SecurityConfig {
+    @Override
+    public void configure() {
+        permit("POST", "/user/check-password");
+        permit("GET", "/publico/hello");
+        permit("POST", "/user/login");
+        permit("POST", "/user/save");
+
+        hasRole("DELETE", "/user/delete/{id}", "admin");
+        hasRole("GET", "/user", "admin");
+        hasRole("GET", "/user/equals", "admin", "gestor");
+
+        addFilter(new AuthFilter(), new RoleFilter(getRouteControl()));
+    }
+}
+```
+
+---
+
+## 🔢 Roadmap Futuro
+
+* ✈️ Criação de interceptadores de requisições
+* ⚖️ Criação de relação N\:N
 
 ---
 
 > Desenvolvido com paixão e curiosidade por **Zard**. Aprender construindo é a melhor forma de dominar qualquer tecnologia.
-
 
