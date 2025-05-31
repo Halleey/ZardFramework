@@ -13,7 +13,7 @@ public class MultipartFile {
         this.fieldName = fieldName;
         this.originalFilename = originalFilename;
         this.contentType = contentType;
-        this.bytes = bytes;
+        this.bytes = bytes != null ? bytes : new byte[0];
     }
 
     public String getFieldName() { return fieldName; }

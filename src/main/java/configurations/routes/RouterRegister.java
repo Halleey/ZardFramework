@@ -12,21 +12,18 @@ import project.entities.JsonUtils;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-import java.util.Map;
-public class RouterRegister {
 
+public class RouterRegister {
 
     public static void registerRoutes(Server server, Object controller, SecurityConfig securityConfig) {
         Class<?> controllerClass = controller.getClass();
         String basePath = getBasePath(controllerClass);
 
-        // Aplica configuração de segurança se estiver presente
         if (securityConfig != null) {
             securityConfig.configure();
         }
 
-        Method[] methods = controllerClass.getDeclaredMethods();
-        for (Method method : methods) {
+        for (Method method : controllerClass.getDeclaredMethods()) {
             String httpMethod = null;
             String path = null;
 
@@ -46,7 +43,7 @@ public class RouterRegister {
 
             if (httpMethod != null && path != null) {
                 boolean applySecurity = false;
-                SecurityFilter filter = new SecurityFilter(); // filtro vazio por padrão
+                SecurityFilter filter = new SecurityFilter();
 
                 if (securityConfig != null) {
                     SecurityRouteControl routeControl = securityConfig.getRouteControl();
@@ -70,48 +67,29 @@ public class RouterRegister {
                     case "PATCH" -> server.patch(path, handler);
                     default -> throw new IllegalArgumentException("Método HTTP não suportado: " + httpMethod);
                 }
-
-//                System.out.printf("Registrada: [%s] %s %s\n",
-//                        httpMethod,
-//                        path,
-//                        applySecurity ? "(PROTEGIDA)" : "(PÚBLICA)"
-//                );
             }
         }
     }
-            private static String getBasePath(Class<?> controllerClass) {
-        String basePath = "";
 
-        if (controllerClass.isAnnotationPresent(RequestController.class)) {
-            RequestController annotation = controllerClass.getAnnotation(RequestController.class);
-            basePath = annotation.value();
-            if (!basePath.startsWith("/")) {
-                basePath = "/" + basePath;
-            }
-            if (basePath.endsWith("/")) {
-                basePath = basePath.substring(0, basePath.length() - 1);
-            }
-        }
+    private static String getBasePath(Class<?> controllerClass) {
+        if (!controllerClass.isAnnotationPresent(RequestController.class)) return "";
 
+        String basePath = controllerClass.getAnnotation(RequestController.class).value();
+        if (!basePath.startsWith("/")) basePath = "/" + basePath;
+        if (basePath.endsWith("/")) basePath = basePath.substring(0, basePath.length() - 1);
         return basePath;
     }
 
     private static String combinePaths(String basePath, String value) {
-        if (value == null || value.isEmpty() || value.equals("/")) {
-            return basePath;
-        }
-        if (!value.startsWith("/")) {
-            value = "/" + value;
-        }
+        if (value == null || value.isEmpty() || value.equals("/")) return basePath;
+        if (!value.startsWith("/")) value = "/" + value;
         return basePath + value;
     }
 
     private static RequestHandler createHandler(Object controller, Method method, boolean applySecurity, SecurityFilter securityFilter) {
         return (req, res) -> {
             try {
-                if (applySecurity) {
-                    securityFilter.doFilter(req, res);
-                }
+                if (applySecurity) securityFilter.doFilter(req, res);
 
                 Parameter[] parameters = method.getParameters();
                 Object[] args = new Object[parameters.length];
@@ -120,21 +98,16 @@ public class RouterRegister {
                     Parameter parameter = parameters[i];
                     Class<?> type = parameter.getType();
 
-                    if (type == Request.class) {
-                        args[i] = req;
-                    } else if (type == Response.class) {
-                        args[i] = res;
-                    } else if (parameter.isAnnotationPresent(QueryParam.class)) {
+                    if (type == Request.class) args[i] = req;
+                    else if (type == Response.class) args[i] = res;
+                    else if (parameter.isAnnotationPresent(QueryParam.class)) {
                         String key = parameter.getAnnotation(QueryParam.class).value();
-                        String rawValue = req.getQueryParam(key);
-                        args[i] = convertValue(rawValue, type);
+                        args[i] = convertValue(req.getQueryParam(key), type);
                     } else if (parameter.isAnnotationPresent(PathParam.class)) {
                         String key = parameter.getAnnotation(PathParam.class).value();
-                        String rawValue = req.getPathParam(key);
-                        args[i] = convertValue(rawValue, type);
+                        args[i] = convertValue(req.getPathParam(key), type);
                     } else {
-                        String body = req.getBody();
-                        args[i] = JsonUtils.fromJson(body, type);
+                        args[i] = JsonUtils.fromJson(req.getBody(), type);
                     }
                 }
 
@@ -142,17 +115,16 @@ public class RouterRegister {
                 if (result != null) {
                     if (result instanceof ResponseEntity<?> entity) {
                         res.setStatus(entity.getStatusCode());
-                        for (Map.Entry<String, String> header : entity.getHeaders().entrySet()) {
-                            res.setHeader(header.getKey(), header.getValue());
-                        }
+                        entity.getHeaders().forEach(res::setHeader);
                         res.send(entity.getBody());
                     } else {
-                        res.send(result.toString());
+                        res.send(result);
                     }
                 }
 
             } catch (FilterException e) {
                 System.out.println("Bloqueado pelo filtro: " + e.getMessage());
+                res.send(403, "Acesso negado: " + e.getMessage());
             } catch (Exception e) {
                 e.printStackTrace();
                 res.send(500, "Erro interno: " + e.getMessage());
@@ -162,11 +134,13 @@ public class RouterRegister {
 
     private static Object convertValue(String value, Class<?> targetType) {
         if (value == null) return null;
-        if (targetType == String.class) return value;
-        if (targetType == int.class || targetType == Integer.class) return Integer.parseInt(value);
-        if (targetType == long.class || targetType == Long.class) return Long.parseLong(value);
-        if (targetType == double.class || targetType == Double.class) return Double.parseDouble(value);
-        if (targetType == boolean.class || targetType == Boolean.class) return Boolean.parseBoolean(value);
-        return null;
+        return switch (targetType.getSimpleName()) {
+            case "String" -> value;
+            case "int", "Integer" -> Integer.parseInt(value);
+            case "long", "Long" -> Long.parseLong(value);
+            case "double", "Double" -> Double.parseDouble(value);
+            case "boolean", "Boolean" -> Boolean.parseBoolean(value);
+            default -> null;
+        };
     }
 }

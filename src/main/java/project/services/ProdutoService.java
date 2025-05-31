@@ -1,34 +1,55 @@
 package project.services;
 
 import configurations.instancias.Service;
-import configurations.parsers.MultipartFile;
-import project.dtos.ProdutoUploadDto;
+
+import project.dtos.ProductRequestDto;
+
 import project.entities.Product;
 import project.repositories.ProductRepository;
 
+import java.util.List;
 import java.util.Optional;
+
 
 @Service
 public class ProdutoService {
 
-    private final ProductRepository repository;
-
+    private  final ProductRepository repository;
 
     public ProdutoService(ProductRepository repository) {
         this.repository = repository;
 
     }
+    public void saveProductWithImage(ProductRequestDto dto) {
+        Product product = new Product();
+        product.setNome(dto.getNome());
+        product.setPrice(dto.getPrice());
 
-    public void salvarProdutoComImagem(ProdutoUploadDto dto, MultipartFile imagem) {
-        Product produto = new Product();
-        produto.setNome(dto.getNome());
-        produto.setPrice(dto.getPrice());
-        produto.setLargeimage(imagem.getBytes());
+        if (dto.getImage() != null) {
+            product.setLargeimage(dto.getImage());
+        }
 
-        repository.save(produto);
+        repository.save(product);
+    }
+
+
+    public List<Product> getProduct(String nome) {
+
+        return repository.findByName(nome);
+    }
+
+    public void update(Long id, String nome) {
+
+
+        Product product =  repository.findById(id).orElseThrow(() -> new RuntimeException("Produto não existe"));
+
+        product.setNome(nome);
+
+        repository.update(product);
     }
 
     public Optional<Product> findById(Long id) {
-       return repository.findById(id);
+     
+        return  repository.findById(id);
     }
 }

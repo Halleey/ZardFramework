@@ -2,17 +2,24 @@ package configurations.requests;
 
 import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
+import configurations.parsers.MultipartFile;
+import configurations.parsers.MultipartParser;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 public class Request {
     private final HttpExchange exchange;
     private Map<String, String> pathParams = new HashMap<>();
     private final Map<String, Object> attributes = new HashMap<>();
+
+    private byte[] rawBodyBytes; // cache do corpo da requisição
+    private Map<String, String> formFields;
+    private Map<String, MultipartFile> formFiles;
 
     public Request(HttpExchange exchange) {
         this.exchange = exchange;
@@ -30,18 +37,13 @@ public class Request {
         return exchange.getRequestURI().getPath();
     }
 
-    public String getBody() throws IOException {
-        InputStream inputStream = exchange.getRequestBody();
-        return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-    }
-
     public String getQueryParam(String key) {
         String query = exchange.getRequestURI().getQuery();
         if (query == null) return null;
         for (String param : query.split("&")) {
-            String[] pair = param.split("=");
+            String[] pair = param.split("=", 2);
             if (pair.length == 2 && pair[0].equals(key)) {
-                return pair[1];
+                return URLDecoder.decode(pair[1], StandardCharsets.UTF_8);
             }
         }
         return null;
@@ -64,7 +66,6 @@ public class Request {
         return pathParams.get(key);
     }
 
-    // ====== NOVO: atributos (úteis para filtros) ======
     public void setAttribute(String key, Object value) {
         attributes.put(key, value);
     }
@@ -78,4 +79,49 @@ public class Request {
         Object value = attributes.get(key);
         return type.isInstance(value) ? (T) value : null;
     }
+
+    public String getBody() throws IOException {
+        return getBodyAsText();
+    }
+
+
+    public String getBodyAsText() throws IOException {
+        return new String(getRawBodyBytes(), StandardCharsets.UTF_8);
+    }
+
+    public byte[] getRawBodyBytes() throws IOException {
+        if (rawBodyBytes == null) {
+            rawBodyBytes = exchange.getRequestBody().readAllBytes();
+        }
+        return rawBodyBytes;
+    }
+
+    public Map<String, String> getFormFields() throws IOException {
+        if (formFields == null) {
+            parseMultipart();
+        }
+        return formFields;
+    }
+
+    public Map<String, MultipartFile> getFormFiles() throws IOException {
+        if (formFiles == null) {
+            parseMultipart();
+        }
+        return formFiles;
+    }
+
+    private void parseMultipart() throws IOException {
+        String contentType = getContentType();
+        if (contentType != null && contentType.startsWith("multipart/form-data")) {
+            String boundary = contentType.split("boundary=")[1];
+            byte[] bodyBytes = getRawBodyBytes();  // manter bytes
+            formFields = MultipartParser.parseFields(bodyBytes, boundary);
+            formFiles = MultipartParser.parseFiles(bodyBytes, boundary);
+        } else {
+            formFields = Collections.emptyMap();
+            formFiles = Collections.emptyMap();
+        }
+    }
+
 }
+

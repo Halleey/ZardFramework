@@ -2,6 +2,7 @@ package configurations;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpServer;
+import configurations.requests.CorsHandler;
 import configurations.routes.Router;
 import configurations.handlers.RequestHandler;
 import configurations.requests.Request;
@@ -44,21 +45,28 @@ public class Server {
         server.start(); // Inicia o servidor
         System.out.println("Servidor rodando na porta " + port);
     }
-
     private void handleRequest(HttpExchange exchange) throws IOException {
+        // Trata preflight CORS globalmente
+        if (CorsHandler.handlePreflight(exchange)) {
+            return;
+        }
+
+        // Adiciona headers CORS para todas as respostas (não OPTIONS)
+        CorsHandler.addCorsHeaders(exchange);
+
         String method = exchange.getRequestMethod();
         String path = exchange.getRequestURI().getPath();
+
         Router.RouteMatch match = router.findHandler(method, path);
 
         if (match != null) {
             Request req = new Request(exchange);
-            req.setPathParams(match.pathParams); // importante!
+            req.setPathParams(match.pathParams);
             Response res = new Response(exchange);
             match.handler.handle(req, res);
         } else {
             String notFound = "404 Not Found";
-            System.out.println("Thread: " + Thread.currentThread().getName() +
-                    " não encontrou rota para: " + path);
+            System.out.println("Thread: " + Thread.currentThread().getName() + " não encontrou rota para: " + path);
             exchange.sendResponseHeaders(404, notFound.length());
             exchange.getResponseBody().write(notFound.getBytes());
             exchange.close();
