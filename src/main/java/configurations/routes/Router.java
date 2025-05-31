@@ -12,7 +12,7 @@ public class Router {
 
     public void addRoute(String method, String path, RequestHandler handler) {
         path = normalizePath(path);
-       // System.out.printf("[Router] Registrando rota - Método: %s, Path: %s\n", method, path);
+        System.out.printf("[Router] Registrando rota - Método: %s, Path: %s\n", method, path);
         routes.computeIfAbsent(method, k -> new ArrayList<>()).add(new Route(path, handler));
     }
 

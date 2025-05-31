@@ -18,6 +18,10 @@ public class Request {
         this.exchange = exchange;
     }
 
+    public String getContentType() {
+        return exchange.getRequestHeaders().getFirst("Content-Type");
+    }
+
     public String getMethod() {
         return exchange.getRequestMethod();
     }

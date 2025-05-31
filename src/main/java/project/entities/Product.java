@@ -17,10 +17,14 @@ public class Product {
     @Column(blobType = BlobType.LARGE)
     byte[] largeimage;
 
+    public Long getId() {
+        return id;
+    }
 
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    @ManyToOne
-    private Pedido ordersPedido;
     public String getNome() {
         return nome;
     }
