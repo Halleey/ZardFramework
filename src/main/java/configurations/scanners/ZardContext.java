@@ -4,6 +4,8 @@ import configurations.genericsRepositories.RepositoryFactory;
 import configurations.instancias.Repository;
 import configurations.instancias.RestController;
 import configurations.instancias.Service;
+import configurations.requests.CorsConfiguration;
+import configurations.security.EnableCors;
 import configurations.security.EnableSecurity;
 import configurations.security.auth.SecurityConfig;
 
@@ -17,6 +19,23 @@ public class ZardContext {
 
     // Metodo principal que inicializa todo o contexto, escaneando o pacote e instanciando os componentes
     public void initialize(String basePackage) throws Exception {
+
+
+
+        // Instancia a classe de configuração de CORS anotada com @EnableCors
+        Set<Class<?>> corsConfigs = ClassScanner.getAnnotatedClasses(basePackage, EnableCors.class);
+        if (!corsConfigs.isEmpty()) {
+            if (corsConfigs.size() > 1) {
+                throw new RuntimeException("Apenas uma classe pode ser anotada com @EnableCors.");
+            }
+
+            Class<?> configClass = corsConfigs.iterator().next();
+
+            CorsConfiguration corsConfiguration = (CorsConfiguration) configClass.getDeclaredConstructor().newInstance();
+
+            container.put(CorsConfiguration.class, corsConfiguration);
+        }
+
 
         // Instancia todos os repositórios anotados com @Repository
         for (Class<?> clazz : ClassScanner.getAnnotatedClasses(basePackage, Repository.class)) {

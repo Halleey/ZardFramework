@@ -8,7 +8,6 @@ import io.jsonwebtoken.Claims;
 import java.io.IOException;
 import java.util.Set;
 
-import static configurations.security.SecurityFilter.normalize;
 
 public class RoleFilter implements FilterClass{
 

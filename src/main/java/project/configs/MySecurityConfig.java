@@ -1,6 +1,7 @@
 package project.configs;
 
 import configurations.security.AuthFilter;
+import configurations.security.EnableCors;
 import configurations.security.EnableSecurity;
 import configurations.security.RoleFilter;
 import configurations.security.auth.SecurityConfig;

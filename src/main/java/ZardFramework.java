@@ -1,15 +1,13 @@
 import configurations.Server;
 import configurations.orm.EntityManager;
+import configurations.requests.CorsConfiguration;
+import configurations.requests.CorsHandler;
 import configurations.routes.RouterRegister;
 import configurations.scanners.ZardContext;
 import configurations.security.auth.SecurityConfig;
-
 public class ZardFramework {
 
     public static void run(int port, String basePackage, String entityPackage) throws Exception {
-        // Inicializa o servidor
-        Server server = new Server(port);
-
         // Gera o schema automaticamente
         EntityManager.generateSchema(entityPackage);
 
@@ -17,24 +15,34 @@ public class ZardFramework {
         ZardContext context = new ZardContext();
         context.initialize(basePackage);
 
-        // Tenta carregar configuração de segurança, se existir
+        // Recupera configuração de segurança, se houver
         SecurityConfig securityConfig = null;
         try {
             securityConfig = context.get(SecurityConfig.class);
         } catch (Exception ignored) {
-            System.out.println("🔓 Segurança desabilitada: nenhuma configuração detectada.");
+            System.out.println("Segurança desabilitada: nenhuma configuração detectada.");
         }
 
-        // Registra automaticamente todos os controladores e suas rotas
+        // Recupera configuração de CORS, se houver
+        CorsConfiguration corsConfig = null;
+        try {
+            corsConfig = context.get(CorsConfiguration.class);
+        } catch (Exception ignored) {
+            System.out.println("CORS desabilitado: nenhuma configuração detectada.");
+        }
+
+        // Cria handler de CORS (pode ser null)
+        CorsHandler corsHandler = corsConfig != null ? new CorsHandler(corsConfig) : null;
+
+        // Inicializa o servidor com CORS (se disponível)
+        Server server = new Server(port, corsHandler);
+
+        // Registra rotas
         for (Object controller : context.getControllers()) {
             RouterRegister.registerRoutes(server, controller, securityConfig);
         }
 
         // Inicia o servidor
         server.start();
-        // Log visual das rotas registradas (opcional)
     }
-
-
 }
-

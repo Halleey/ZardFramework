@@ -60,7 +60,6 @@ public class Response {
             send(str);
         } else if (body instanceof byte[] bytes) {
             System.out.printf("[DEBUG] Enviando byte[]. Tamanho: %d bytes%n", bytes.length);
-
             if (!headersSent) {
                 applyHeaders();
                 headersSent = true;

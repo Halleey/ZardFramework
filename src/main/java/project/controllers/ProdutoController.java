@@ -47,6 +47,8 @@ public class ProdutoController {
         Map<String, String> fields = MultipartParser.parseFields(bodyBytes, boundary);
         Map<String, MultipartFile> files = MultipartParser.parseFiles(bodyBytes, boundary);
 
+        //mantem na mão
+        //mover para service
         ProductRequestDto dto = new ProductRequestDto();
         dto.setNome(fields.get("nome"));
         dto.setPrice(new BigDecimal(fields.get("price")));
@@ -55,7 +57,6 @@ public class ProdutoController {
         if (imageFile != null && !imageFile.isEmpty()) {
             dto.setImage(imageFile.getBytes());
         }
-
         produtoService.saveProductWithImage(dto);
 
         response.send(201, "Produto com imagem salvo.");
@@ -84,11 +85,12 @@ public class ProdutoController {
             return ResponseEntity.status(404, e.getMessage());
         }
     }
+
     @GetRouter("/{id}/image")
     public void getProductImage(Request request, Response response) throws IOException {
         String idStr = request.getPathParam("id");
 
-        Long id;
+        long id;
         try {
             id = Long.parseLong(idStr);
         } catch (NumberFormatException e) {
