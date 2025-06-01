@@ -10,9 +10,9 @@ import configurations.security.auth.SecurityConfig;
 import configurations.security.auth.SecurityRouteControl;
 import project.entities.JsonUtils;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
-
 public class RouterRegister {
 
     public static void registerRoutes(Server server, Object controller, SecurityConfig securityConfig) {
@@ -20,38 +20,23 @@ public class RouterRegister {
         String basePath = getBasePath(controllerClass);
 
         if (securityConfig != null) {
-            securityConfig.configure();
+            securityConfig.configure(); // Inicializa qualquer configuração
         }
 
         for (Method method : controllerClass.getDeclaredMethods()) {
-            String httpMethod = null;
-            String path = null;
+            String httpMethod = getHttpMethod(method);
+            String routePath = getRoutePath(basePath, method);
 
-            if (method.isAnnotationPresent(GetRouter.class)) {
-                path = combinePaths(basePath, method.getAnnotation(GetRouter.class).value());
-                httpMethod = "GET";
-            } else if (method.isAnnotationPresent(PostRouter.class)) {
-                path = combinePaths(basePath, method.getAnnotation(PostRouter.class).value());
-                httpMethod = "POST";
-            } else if (method.isAnnotationPresent(DeleteRouter.class)) {
-                path = combinePaths(basePath, method.getAnnotation(DeleteRouter.class).value());
-                httpMethod = "DELETE";
-            } else if (method.isAnnotationPresent(PatchRouter.class)) {
-                path = combinePaths(basePath, method.getAnnotation(PatchRouter.class).value());
-                httpMethod = "PATCH";
-            }
-
-            if (httpMethod != null && path != null) {
+            if (httpMethod != null && routePath != null) {
                 boolean applySecurity = false;
                 SecurityFilter filter = new SecurityFilter();
 
                 if (securityConfig != null) {
-                    SecurityRouteControl routeControl = securityConfig.getRouteControl();
+                    SecurityRouteControl control = securityConfig.getRouteControl();
+                    boolean isPublic = control.isPublic(httpMethod, routePath);
+                    boolean needsRole = control.requiresRole(httpMethod, routePath);
 
-                    boolean isPublic = routeControl.isPublic(httpMethod, path);
-                    boolean requiresRole = routeControl.requiresRole(httpMethod, path);
-
-                    applySecurity = !isPublic || requiresRole;
+                    applySecurity = !isPublic || needsRole;
 
                     if (applySecurity) {
                         filter = securityConfig.getFilterChain();
@@ -59,59 +44,59 @@ public class RouterRegister {
                 }
 
                 RequestHandler handler = createHandler(controller, method, applySecurity, filter);
-
-                switch (httpMethod) {
-                    case "GET" -> server.get(path, handler);
-                    case "POST" -> server.post(path, handler);
-                    case "DELETE" -> server.delete(path, handler);
-                    case "PATCH" -> server.patch(path, handler);
-                    default -> throw new IllegalArgumentException("Método HTTP não suportado: " + httpMethod);
-                }
+                registerRoute(server, httpMethod, routePath, handler);
             }
         }
     }
 
     private static String getBasePath(Class<?> controllerClass) {
         if (!controllerClass.isAnnotationPresent(RequestController.class)) return "";
-
-        String basePath = controllerClass.getAnnotation(RequestController.class).value();
-        if (!basePath.startsWith("/")) basePath = "/" + basePath;
-        if (basePath.endsWith("/")) basePath = basePath.substring(0, basePath.length() - 1);
-        return basePath;
+        String base = controllerClass.getAnnotation(RequestController.class).value();
+        if (!base.startsWith("/")) base = "/" + base;
+        if (base.endsWith("/")) base = base.substring(0, base.length() - 1);
+        return base;
     }
 
-    private static String combinePaths(String basePath, String value) {
-        if (value == null || value.isEmpty() || value.equals("/")) return basePath;
-        if (!value.startsWith("/")) value = "/" + value;
-        return basePath + value;
+    private static String getHttpMethod(Method method) {
+        if (method.isAnnotationPresent(GetRouter.class)) return "GET";
+        if (method.isAnnotationPresent(PostRouter.class)) return "POST";
+        if (method.isAnnotationPresent(DeleteRouter.class)) return "DELETE";
+        if (method.isAnnotationPresent(PatchRouter.class)) return "PATCH";
+        return null;
+    }
+
+    private static String getRoutePath(String basePath, Method method) {
+        String subPath = null;
+        if (method.isAnnotationPresent(GetRouter.class)) subPath = method.getAnnotation(GetRouter.class).value();
+        else if (method.isAnnotationPresent(PostRouter.class)) subPath = method.getAnnotation(PostRouter.class).value();
+        else if (method.isAnnotationPresent(DeleteRouter.class)) subPath = method.getAnnotation(DeleteRouter.class).value();
+        else if (method.isAnnotationPresent(PatchRouter.class)) subPath = method.getAnnotation(PatchRouter.class).value();
+
+        if (subPath == null || subPath.isEmpty() || subPath.equals("/")) return basePath;
+        if (!subPath.startsWith("/")) subPath = "/" + subPath;
+        return basePath + subPath;
+    }
+
+    private static void registerRoute(Server server, String method, String path, RequestHandler handler) {
+        switch (method) {
+            case "GET" -> server.get(path, handler);
+            case "POST" -> server.post(path, handler);
+            case "DELETE" -> server.delete(path, handler);
+            case "PATCH" -> server.patch(path, handler);
+            default -> throw new IllegalArgumentException("Método HTTP não suportado: " + method);
+        }
     }
 
     private static RequestHandler createHandler(Object controller, Method method, boolean applySecurity, SecurityFilter securityFilter) {
         return (req, res) -> {
             try {
-                if (applySecurity) securityFilter.doFilter(req, res);
-
-                Parameter[] parameters = method.getParameters();
-                Object[] args = new Object[parameters.length];
-
-                for (int i = 0; i < parameters.length; i++) {
-                    Parameter parameter = parameters[i];
-                    Class<?> type = parameter.getType();
-
-                    if (type == Request.class) args[i] = req;
-                    else if (type == Response.class) args[i] = res;
-                    else if (parameter.isAnnotationPresent(QueryParam.class)) {
-                        String key = parameter.getAnnotation(QueryParam.class).value();
-                        args[i] = convertValue(req.getQueryParam(key), type);
-                    } else if (parameter.isAnnotationPresent(PathParam.class)) {
-                        String key = parameter.getAnnotation(PathParam.class).value();
-                        args[i] = convertValue(req.getPathParam(key), type);
-                    } else {
-                        args[i] = JsonUtils.fromJson(req.getBody(), type);
-                    }
+                if (applySecurity) {
+                    securityFilter.doFilter(req, res);
                 }
 
+                Object[] args = resolveMethodArgs(method, req, res);
                 Object result = method.invoke(controller, args);
+
                 if (result != null) {
                     if (result instanceof ResponseEntity<?> entity) {
                         res.setStatus(entity.getStatusCode());
@@ -123,13 +108,39 @@ public class RouterRegister {
                 }
 
             } catch (FilterException e) {
-                System.out.println("Bloqueado pelo filtro: " + e.getMessage());
+                System.out.println("Acesso bloqueado pelo filtro: " + e.getMessage());
                 res.send(403, "Acesso negado: " + e.getMessage());
             } catch (Exception e) {
                 e.printStackTrace();
                 res.send(500, "Erro interno: " + e.getMessage());
             }
         };
+    }
+
+    private static Object[] resolveMethodArgs(Method method, Request req, Response res) throws IOException {
+        Parameter[] parameters = method.getParameters();
+        Object[] args = new Object[parameters.length];
+
+        for (int i = 0; i < parameters.length; i++) {
+            Parameter param = parameters[i];
+            Class<?> type = param.getType();
+
+            if (type == Request.class) {
+                args[i] = req;
+            } else if (type == Response.class) {
+                args[i] = res;
+            } else if (param.isAnnotationPresent(QueryParam.class)) {
+                String key = param.getAnnotation(QueryParam.class).value();
+                args[i] = convertValue(req.getQueryParam(key), type);
+            } else if (param.isAnnotationPresent(PathParam.class)) {
+                String key = param.getAnnotation(PathParam.class).value();
+                args[i] = convertValue(req.getPathParam(key), type);
+            } else {
+                args[i] = JsonUtils.fromJson(req.getBody(), type);
+            }
+        }
+
+        return args;
     }
 
     private static Object convertValue(String value, Class<?> targetType) {

@@ -14,9 +14,9 @@ public class AuthFilter implements FilterClass {
         if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
             return;
         }
-        System.out.println("===== Debug Headers =====");
-        request.getHeaders().forEach((k, v) -> System.out.println(k + ": " + v));
-        System.out.println("=========================");
+//        System.out.println("===== Debug Headers =====");
+//        request.getHeaders().forEach((k, v) -> System.out.println(k + ": " + v));
+//        System.out.println("=========================");
 
         String token = request.getHeaders().get("Authorization");
 
