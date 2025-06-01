@@ -33,6 +33,7 @@ public class CorsHandler {
         }
         return false;
     }
+
     public CorsConfiguration getConfig() {
         return config;
     }

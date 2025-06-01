@@ -26,7 +26,7 @@ public abstract class CorsConfiguration {
     }
 
     public void allowHeader(HttpHeader... headers) {
-        this.allowedHeaders = Arrays.stream(headers).map(Enum::name).collect(Collectors.toList());
+        this.allowedHeaders = Arrays.stream(headers).map(HttpHeader::getValue).collect(Collectors.toList());
     }
 
     public String getAllowedOriginsHeader() {

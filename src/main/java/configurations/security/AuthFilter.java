@@ -11,6 +11,13 @@ import java.io.IOException;
 public class AuthFilter implements FilterClass {
     @Override
     public void doFilter(Request request, Response response, SecurityFilter securityFilter) throws IOException, FilterException {
+        if ("OPTIONS".equalsIgnoreCase(request.getMethod())) {
+            return;
+        }
+        System.out.println("===== Debug Headers =====");
+        request.getHeaders().forEach((k, v) -> System.out.println(k + ": " + v));
+        System.out.println("=========================");
+
         String token = request.getHeaders().get("Authorization");
 
         if (token == null || !token.startsWith("Bearer ")) {
@@ -23,13 +30,14 @@ public class AuthFilter implements FilterClass {
         try {
             Jws<Claims> claims = JwtUtil.validateToken(token);
 
-            // Simplesmente injeta o conteúdo bruto do JWT
+            // Injeta o conteúdo bruto do JWT
             request.setAttribute("jwt.claims", claims.getBody());
 
         } catch (JwtException e) {
             deny(response);
         }
     }
+
 
     private void deny(Response response) throws IOException, FilterException {
         response.setHeader("Content-Type", "text/plain; charset=UTF-8");
