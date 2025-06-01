@@ -1,6 +1,7 @@
 package project.controllers;
 
 import configurations.instancias.RestController;
+import configurations.parsers.MultiFile;
 import configurations.parsers.MultipartFile;
 import configurations.parsers.MultipartParser;
 import configurations.responses.ResponseEntity;
@@ -31,37 +32,14 @@ public class ProdutoController {
     }
 
 
-
     @PostRouter("/upload")
-    public void saveProductWithImage(Request request, Response response) throws IOException {
-        String contentType = request.getContentType();
-
-        if (contentType == null || !contentType.startsWith("multipart/form-data")) {
-            response.send(400, "Tipo de conteúdo inválido.");
-            return;
-        }
-
-        String boundary = contentType.split("boundary=")[1];
-
-        byte[] bodyBytes = request.getRawBodyBytes();
-
-        Map<String, String> fields = MultipartParser.parseFields(bodyBytes, boundary);
-        Map<String, MultipartFile> files = MultipartParser.parseFiles(bodyBytes, boundary);
-
-        //mantem na mão
-        //mover para service
-        ProductRequestDto dto = new ProductRequestDto();
-        dto.setNome(fields.get("nome"));
-        dto.setPrice(new BigDecimal(fields.get("price")));
-
-        MultipartFile imageFile = files.get("imagem");
-        if (imageFile != null && !imageFile.isEmpty()) {
-            dto.setImage(imageFile.getBytes());
-        }
-        produtoService.saveProductWithImage(dto);
-
-        response.send(201, "Produto com imagem salvo.");
+    public ResponseEntity<String> saveProductWithImage(@MultiFile("image") MultipartFile imageFile, ProductRequestDto dto) throws IOException {
+        // imageFile já preenchido com o arquivo do campo "image"
+        // dto populado com os demais campos do multipart/form-data
+        produtoService.saveProductWithImage(dto, imageFile);
+        return ResponseEntity.status(201, "product save");
     }
+
 
 
     @GetRouter("")

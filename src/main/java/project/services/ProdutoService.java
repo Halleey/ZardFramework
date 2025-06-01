@@ -2,11 +2,13 @@ package project.services;
 
 import configurations.instancias.Service;
 
+import configurations.parsers.MultipartFile;
 import project.dtos.ProductRequestDto;
 
 import project.entities.Product;
 import project.repositories.ProductRepository;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,17 +22,22 @@ public class ProdutoService {
         this.repository = repository;
 
     }
-    public void saveProductWithImage(ProductRequestDto dto) {
+    public void saveProductWithImage(ProductRequestDto dto, MultipartFile imageFile) throws IOException {
+        if (imageFile != null && !imageFile.isEmpty()) {
+            dto.setImage(imageFile.getBytes()); // preenche o array de bytes da imagem no DTO
+        }
+
         Product product = new Product();
         product.setNome(dto.getNome());
         product.setPrice(dto.getPrice());
-
+        System.out.println("preço que chegou " +  dto.getPrice());
         if (dto.getImage() != null) {
             product.setLargeimage(dto.getImage());
         }
 
         repository.save(product);
     }
+
 
 
     public List<Product> getProduct(String nome) {

@@ -1,6 +1,8 @@
 package configurations.routes;
 import configurations.Server;
 import configurations.handlers.RequestHandler;
+import configurations.parsers.MultiFile;
+import configurations.parsers.MultipartFile;
 import configurations.requests.Request;
 import configurations.requests.Response;
 import configurations.responses.ResponseEntity;
@@ -11,8 +13,12 @@ import configurations.security.auth.SecurityRouteControl;
 import project.entities.JsonUtils;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.math.BigDecimal;
+import java.util.Map;
+
 public class RouterRegister {
 
     public static void registerRoutes(Server server, Object controller, SecurityConfig securityConfig) {
@@ -20,7 +26,7 @@ public class RouterRegister {
         String basePath = getBasePath(controllerClass);
 
         if (securityConfig != null) {
-            securityConfig.configure(); // Inicializa qualquer configuração
+            securityConfig.configure(); // Inicializa configurações
         }
 
         for (Method method : controllerClass.getDeclaredMethods()) {
@@ -121,36 +127,100 @@ public class RouterRegister {
         Parameter[] parameters = method.getParameters();
         Object[] args = new Object[parameters.length];
 
+        MapHolder holder = new MapHolder();
+
         for (int i = 0; i < parameters.length; i++) {
             Parameter param = parameters[i];
             Class<?> type = param.getType();
-
-            if (type == Request.class) {
-                args[i] = req;
-            } else if (type == Response.class) {
-                args[i] = res;
-            } else if (param.isAnnotationPresent(QueryParam.class)) {
-                String key = param.getAnnotation(QueryParam.class).value();
-                args[i] = convertValue(req.getQueryParam(key), type);
-            } else if (param.isAnnotationPresent(PathParam.class)) {
-                String key = param.getAnnotation(PathParam.class).value();
-                args[i] = convertValue(req.getPathParam(key), type);
-            } else {
-                args[i] = JsonUtils.fromJson(req.getBody(), type);
-            }
+            args[i] = resolveArgument(param, type, req, res, holder);
         }
 
         return args;
     }
+    private static Object resolveArgument(Parameter param, Class<?> type, Request req, Response res, MapHolder holder) throws IOException {
+        if (type == Request.class) return req;
+        if (type == Response.class) return res;
+
+        if (param.isAnnotationPresent(QueryParam.class)) {
+            String key = param.getAnnotation(QueryParam.class).value();
+            return convertValue(req.getQueryParam(key), type);
+        }
+
+        if (param.isAnnotationPresent(PathParam.class)) {
+            String key = param.getAnnotation(PathParam.class).value();
+            return convertValue(req.getPathParam(key), type);
+        }
+
+        if (param.isAnnotationPresent(MultiFile.class)) {
+            ensureMultipartParsed(req, holder);
+            String fieldName = param.getAnnotation(MultiFile.class).value();
+            return holder.files.get(fieldName);
+        }
+
+        // DTOs ou entidades
+        if (isMultipartForm(req) && !type.isPrimitive() && !type.equals(String.class)) {
+            ensureMultipartParsed(req, holder);
+            return mapMultipartFieldsToObject(holder.fields, type);
+        }
+
+        // JSON fallback
+        return JsonUtils.fromJson(req.getBody(), type);
+    }
+
+    private static void parseMultipart(Request req) throws IOException {
+        req.getFormFields(); // já faz caching internamente
+        req.getFormFiles();
+    }
+
+    private static void ensureMultipartParsed(Request req, MapHolder holder) throws IOException {
+        if (!holder.parsed) {
+            parseMultipart(req);
+            holder.fields = req.getFormFields();
+            holder.files = req.getFormFiles();
+            holder.parsed = true;
+        }
+    }
+
+    private static class MapHolder {
+        boolean parsed = false;
+        Map<String, String> fields;
+        Map<String, MultipartFile> files;
+    }
+
+
+    private static boolean isMultipartForm(Request req) {
+        String ct = req.getContentType();
+        return ct != null && ct.startsWith("multipart/form-data");
+    }
+
+
+    private static <T> T mapMultipartFieldsToObject(Map<String, String> fields, Class<T> clazz) {
+        try {
+            T obj = clazz.getDeclaredConstructor().newInstance();
+            for (Field field : clazz.getDeclaredFields()) {
+                field.setAccessible(true);
+                String value = fields.get(field.getName());
+                if (value != null) {
+                    Object converted = convertValue(value, field.getType());
+                    field.set(obj, converted);
+                }
+            }
+            return obj;
+        } catch (Exception e) {
+            throw new RuntimeException("Erro ao mapear multipart fields para " + clazz.getSimpleName(), e);
+        }
+    }
 
     private static Object convertValue(String value, Class<?> targetType) {
         if (value == null) return null;
+
         return switch (targetType.getSimpleName()) {
             case "String" -> value;
             case "int", "Integer" -> Integer.parseInt(value);
             case "long", "Long" -> Long.parseLong(value);
             case "double", "Double" -> Double.parseDouble(value);
             case "boolean", "Boolean" -> Boolean.parseBoolean(value);
+            case "BigDecimal" -> new BigDecimal(value);
             default -> null;
         };
     }
