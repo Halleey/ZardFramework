@@ -1,7 +1,12 @@
 package configurations.requests;
 
+import configurations.requests.configcors.HttpHeader;
+import configurations.requests.configcors.HttpMethod;
+
 import java.util.List;
 import java.util.Arrays;
+import java.util.stream.Collectors;
+
 public abstract class CorsConfiguration {
 
     private List<String> allowedOrigins;
@@ -12,19 +17,16 @@ public abstract class CorsConfiguration {
         configure(); // chama automaticamente quando construir, evitando de ter que fazer explicitamente no main posteriormente
     }
 
-    public CorsConfiguration allowOrigin(String... origins) {
+    public void allowOrigin(String... origins) {
         this.allowedOrigins = Arrays.asList(origins);
-        return this;
     }
 
-    public CorsConfiguration allowMethod(String... methods) {
-        this.allowedMethods = Arrays.asList(methods);
-        return this;
+    public void allowMethod(HttpMethod... methods) {
+        this.allowedMethods = Arrays.stream(methods).map(Enum::name).collect(Collectors.toList());
     }
 
-    public CorsConfiguration allowHeader(String... headers) {
-        this.allowedHeaders = Arrays.asList(headers);
-        return this;
+    public void allowHeader(HttpHeader... headers) {
+        this.allowedHeaders = Arrays.stream(headers).map(Enum::name).collect(Collectors.toList());
     }
 
     public String getAllowedOriginsHeader() {
