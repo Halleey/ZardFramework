@@ -2,7 +2,7 @@ package project.repositories;
 
 import configurations.dbas.Querys;
 import configurations.genericsRepositories.GenericRepository;
-import configurations.instancias.Repository;
+import configurations.genericsRepositories.annotations.Repository;
 import project.entities.Product;
 
 

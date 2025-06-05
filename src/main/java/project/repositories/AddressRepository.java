@@ -1,7 +1,7 @@
 package project.repositories;
 
 import configurations.genericsRepositories.GenericRepository;
-import configurations.instancias.Repository;
+import configurations.genericsRepositories.annotations.Repository;
 import project.entities.Address;
 
 @Repository

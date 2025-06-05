@@ -1,10 +1,12 @@
-import configurations.Server;
+import configurations.core.Server;
+import configurations.core.handlers.RequestInterceptor;
 import configurations.orm.EntityManager;
-import configurations.requests.CorsConfiguration;
-import configurations.requests.CorsHandler;
-import configurations.routes.RouterRegister;
+import configurations.security.configcors.CorsConfiguration;
+import configurations.security.configcors.CorsHandler;
+import configurations.core.routes.RouterRegister;
 import configurations.scanners.ZardContext;
 import configurations.security.auth.SecurityConfig;
+
 public class ZardFramework {
 
     public static void run(int port, String basePackage, String entityPackage) throws Exception {
@@ -15,29 +17,18 @@ public class ZardFramework {
         ZardContext context = new ZardContext();
         context.initialize(basePackage);
 
-        // Recupera configuração de segurança, se houver
-        SecurityConfig securityConfig = null;
-        try {
-            securityConfig = context.get(SecurityConfig.class);
-        } catch (Exception ignored) {
-            System.out.println("Segurança desabilitada: nenhuma configuração detectada.");
+        // Cria servidor
+        Server server = new Server(port);
+
+        // Adiciona automaticamente todos os interceptadores do contexto (inclui CORS, segurança, etc.)
+        for (RequestInterceptor interceptor : context.getBeansOfType(RequestInterceptor.class)) {
+            server.addInterceptor(interceptor);
         }
 
-        // Recupera configuração de CORS, se houver
-        CorsConfiguration corsConfig = null;
-        try {
-            corsConfig = context.get(CorsConfiguration.class);
-        } catch (Exception ignored) {
-            System.out.println("CORS desabilitado: nenhuma configuração detectada.");
-        }
+        // Recupera a config de segurança apenas para o registro de rotas (não interceptação!)
+        SecurityConfig securityConfig = context.getOptional(SecurityConfig.class);
 
-        // Cria handler de CORS (pode ser null)
-        CorsHandler corsHandler = corsConfig != null ? new CorsHandler(corsConfig) : null;
-
-        // Inicializa o servidor com CORS (se disponível)
-        Server server = new Server(port, corsHandler);
-
-        // Registra rotas
+        // Registra rotas automaticamente
         for (Object controller : context.getControllers()) {
             RouterRegister.registerRoutes(server, controller, securityConfig);
         }

@@ -1,7 +1,7 @@
 package project.services;
 
 import configurations.cripted.HashPassword;
-import configurations.instancias.Service;
+import configurations.genericsRepositories.annotations.Service;
 import project.dtos.CheckPasswordDto;
 import project.dtos.UserRequestDto;
 

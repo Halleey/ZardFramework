@@ -1,6 +1,6 @@
 package project.services;
 
-import configurations.instancias.Service;
+import configurations.genericsRepositories.annotations.Service;
 import project.entities.Livros;
 import project.dtos.LivroDto;
 import project.repositories.LivroRepositorio;

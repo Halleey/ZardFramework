@@ -1,23 +1,19 @@
 package project.controllers;
 
-import configurations.instancias.RestController;
-import configurations.parsers.MultiFile;
-import configurations.parsers.MultipartFile;
-import configurations.parsers.MultipartParser;
-import configurations.responses.ResponseEntity;
-import configurations.routes.*;
+import configurations.core.routes.annotations.*;
+import configurations.core.parsers.MultiFile;
+import configurations.core.parsers.MultipartFile;
+import configurations.core.responses.ResponseEntity;
 import project.dtos.ProductRequestDto;
 import project.entities.JsonUtils;
-import configurations.requests.Request;
-import configurations.requests.Response;
+import configurations.core.requests.Request;
+import configurations.core.requests.Response;
 import project.entities.Product;
 import project.services.ProdutoService;
 
 import java.io.IOException;
-import java.math.BigDecimal;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 

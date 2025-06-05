@@ -1,13 +1,14 @@
 package configurations.scanners;
 
 import configurations.genericsRepositories.RepositoryFactory;
-import configurations.instancias.Repository;
-import configurations.instancias.RestController;
-import configurations.instancias.Service;
-import configurations.requests.CorsConfiguration;
+import configurations.genericsRepositories.annotations.Repository;
+import configurations.core.routes.annotations.RestController;
+import configurations.genericsRepositories.annotations.Service;
+import configurations.security.configcors.CorsConfiguration;
 import configurations.security.EnableCors;
 import configurations.security.EnableSecurity;
 import configurations.security.auth.SecurityConfig;
+import configurations.security.configcors.CorsHandler;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.ParameterizedType;
@@ -34,6 +35,10 @@ public class ZardContext {
             CorsConfiguration corsConfiguration = (CorsConfiguration) configClass.getDeclaredConstructor().newInstance();
 
             container.put(CorsConfiguration.class, corsConfiguration);
+
+            // Cria e registra o CorsHandler, que é o interceptor que vai usar essa config
+            CorsHandler corsHandler = new CorsHandler(corsConfiguration);
+            container.put(CorsHandler.class, corsHandler);
         }
 
 
@@ -114,4 +119,28 @@ public class ZardContext {
                 .map(Map.Entry::getValue)
                 .toList();
     }
+
+
+    /**
+     * Retorna a instância do tipo, ou null se não estiver registrada.
+     */
+    public <T> T getOptional(Class<T> clazz) {
+        Object instance = container.get(clazz);
+        if (instance == null) {
+            return null;
+        }
+        return clazz.cast(instance);
+    }
+
+    /**
+     * Retorna todas as instâncias que são do tipo informado (ou subclasses/implementações).
+     */
+    @SuppressWarnings("unchecked")
+    public <T> List<T> getBeansOfType(Class<T> type) {
+        return container.values().stream()
+                .filter(type::isInstance)
+                .map(obj -> (T) obj)
+                .toList();
+    }
+
 }

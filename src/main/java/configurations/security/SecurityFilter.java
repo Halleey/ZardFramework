@@ -1,7 +1,7 @@
 package configurations.security;
 
-import configurations.requests.Request;
-import configurations.requests.Response;
+import configurations.core.requests.Request;
+import configurations.core.requests.Response;
 
 import java.io.IOException;
 import java.util.ArrayList;

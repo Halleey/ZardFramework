@@ -1,9 +1,9 @@
 package project.controllers;
 
-import configurations.instancias.RestController;
-import configurations.responses.ResponseEntity;
-import configurations.routes.PostRouter;
-import configurations.routes.RequestController;
+import configurations.core.routes.annotations.RestController;
+import configurations.core.responses.ResponseEntity;
+import configurations.core.routes.annotations.PostRouter;
+import configurations.core.routes.annotations.RequestController;
 import project.dtos.LivroDto;
 import project.services.LivroService;
 
@@ -21,9 +21,8 @@ public class ControllerLivros {
     }
 
     @PostRouter("")
-    public ResponseEntity saveLivro(LivroDto livroDto) throws IOException {
+    public ResponseEntity<String> saveLivro(LivroDto livroDto) throws IOException {
          livroService.saveLivro(livroDto);
         return ResponseEntity.status(201, "Livro cadastrado com suceso");
     }
-
 }

@@ -1,6 +1,6 @@
 package project.services;
 
-import configurations.instancias.Service;
+import configurations.genericsRepositories.annotations.Service;
 import project.dtos.AddresRequestDto;
 import project.entities.Address;
 import project.repositories.AddressRepository;

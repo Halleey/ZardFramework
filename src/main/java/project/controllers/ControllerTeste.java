@@ -1,14 +1,13 @@
 package project.controllers;
 
-import configurations.instancias.RestController;
-import configurations.responses.ResponseEntity;
-import configurations.routes.*;
+import configurations.core.routes.annotations.*;
+import configurations.core.responses.ResponseEntity;
 import project.entities.JsonUtils;
 import project.dtos.CheckPasswordDto;
 import project.dtos.UserRequestDto;
 import project.entities.Users;
-import configurations.requests.Request;
-import configurations.requests.Response;
+import configurations.core.requests.Request;
+import configurations.core.requests.Response;
 import project.dtos.UserResponseDTO;
 import project.jwt.JwtUtil;
 import project.services.UserService;
@@ -23,23 +22,6 @@ public class ControllerTeste {
     public ControllerTeste(UserService service) {
         this.service = service;
     }
-
-    @GetRouter("")
-    public String helloHandler()  {
-        return "Lets go !";
-    }
-    //Versãoc Arcaica
-
-    @GetRouter("/all")
-    public String getAll() {
-        // Chama o serviço para pegar todos os usuários
-        List<Users> usersList = service.getAll();
-        // Envia a resposta com a lista de usuários
-       return JsonUtils.toJson(usersList);
-    }
-
-    //Versãoc com ResponseEntity
-
     @GetRouter("/todos")
     public ResponseEntity<List<Users>> pegatodos() {
         List<Users> usersList = service.getAll();
@@ -138,6 +120,21 @@ public class ControllerTeste {
         }
     }
 
+    @GetRouter("")
+    public String helloHandler()  {
+        return "Lets go !";
+    }
+    //Versãoc Arcaica
+
+    @GetRouter("/all")
+    public String getAll() {
+        // Chama o serviço para pegar todos os usuários
+        List<Users> usersList = service.getAll();
+        // Envia a resposta com a lista de usuários
+        return JsonUtils.toJson(usersList);
+    }
+
+    //Versãoc com ResponseEntity
 }
 
 

@@ -6,7 +6,7 @@ import configurations.security.EnableSecurity;
 import configurations.security.RoleFilter;
 import configurations.security.auth.SecurityConfig;
 
-
+@EnableSecurity
 public class MySecurityConfig extends SecurityConfig {
     @Override
     public void configure() {

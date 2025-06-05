@@ -1,8 +1,8 @@
 package project.services;
 
-import configurations.instancias.Service;
+import configurations.genericsRepositories.annotations.Service;
 
-import configurations.parsers.MultipartFile;
+import configurations.core.parsers.MultipartFile;
 import project.dtos.ProductRequestDto;
 
 import project.entities.Product;
